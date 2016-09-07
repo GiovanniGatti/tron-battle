@@ -64,7 +64,7 @@ public final class MockedAI {
         private final Action[] actions;
 
         private MockedArtificialIntelligence(Map<String, Object> conf, Action[] actions) {
-            super(conf, () -> 0);
+            super(conf, null);
             this.actions = actions;
         }
 

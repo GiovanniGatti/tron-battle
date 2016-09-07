@@ -225,7 +225,7 @@ class GameTest implements WithAssertions {
     private static class AnotherAI extends AI {
 
         public AnotherAI() {
-            super(() -> 0);
+            super(null);
         }
 
         @Override

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import player.Player.ActionsType;
 import player.Player.KnowledgeRepo;
-import player.Player.KnowledgeRepo.Point;
+import player.Player.Point;
 
 @DisplayName("A knowledge repository")
 class KnowledgeRepoTest implements WithAssertions {

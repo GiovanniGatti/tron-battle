@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.WithAssertions;
@@ -42,16 +43,16 @@ class ContestTest implements WithAssertions {
     @Test
     @DisplayName("returns the classification of a battle between multiple ais on multiple game engines")
     void returnsClassificationBetweenMultipleAIsOnMultipleGameEngines() throws Exception {
-        Function<Supplier<Integer>, Supplier<AI>> firstAI =
+        Function<IntSupplier, Supplier<AI>> firstAI =
                 (t) -> () -> MockedAI.anyConf(ImmutableMap.of("id", "first"));
 
-        Function<Supplier<Integer>, Supplier<AI>> secondAI =
+        Function<IntSupplier, Supplier<AI>> secondAI =
                 (t) -> () -> MockedAI.anyConf(ImmutableMap.of("id", "second"));
 
-        Function<Supplier<Integer>, Supplier<AI>> thirdAI =
+        Function<IntSupplier, Supplier<AI>> thirdAI =
                 (t) -> () -> MockedAI.anyConf(ImmutableMap.of("id", "third"));
 
-        List<Function<Supplier<Integer>, Supplier<AI>>> ais = Arrays.asList(firstAI, secondAI, thirdAI);
+        List<Function<IntSupplier, Supplier<AI>>> ais = Arrays.asList(firstAI, secondAI, thirdAI);
 
         List<Supplier<GameEngine>> gameEngines = Arrays.asList(
                 () -> MockedGE.anyWithWinner(Winner.PLAYER),
@@ -87,10 +88,10 @@ class ContestTest implements WithAssertions {
     @Test
     @DisplayName("cannot run with a one single AI")
     void throwISEWhenSingleAIIsProvided() {
-        Function<Supplier<Integer>, Supplier<AI>> singleAI =
+        Function<IntSupplier, Supplier<AI>> singleAI =
                 (t) -> () -> MockedAI.anyConf(ImmutableMap.of("id", "first"));
 
-        List<Function<Supplier<Integer>, Supplier<AI>>> ais = Collections.singletonList(singleAI);
+        List<Function<IntSupplier, Supplier<AI>>> ais = Collections.singletonList(singleAI);
 
         List<Supplier<GameEngine>> gameEngine = Collections.singletonList(() -> MockedGE.anyWithWinner(Winner.PLAYER));
 
@@ -112,7 +113,7 @@ class ContestTest implements WithAssertions {
         @Test
         @DisplayName("the right average score")
         void averageScore() throws ExecutionException, InterruptedException {
-            List<Function<Supplier<Integer>, Supplier<AI>>> ais = Arrays.asList(
+            List<Function<IntSupplier, Supplier<AI>>> ais = Arrays.asList(
                     (t) -> ContestTest::anyPlayerAI,
                     (t) -> MockedAI::any);
 
@@ -144,7 +145,7 @@ class ContestTest implements WithAssertions {
         @Test
         @DisplayName("the right average number of rounds")
         void averageNumberOfRounds() throws ExecutionException, InterruptedException {
-            List<Function<Supplier<Integer>, Supplier<AI>>> ais = Arrays.asList(
+            List<Function<IntSupplier, Supplier<AI>>> ais = Arrays.asList(
                     (t) -> ContestTest::anyPlayerAI,
                     (t) -> MockedAI::any);
 
@@ -176,7 +177,7 @@ class ContestTest implements WithAssertions {
         @Test
         @DisplayName("the right average win rate")
         void averageWinRate() throws ExecutionException, InterruptedException {
-            List<Function<Supplier<Integer>, Supplier<AI>>> ais = Arrays.asList(
+            List<Function<IntSupplier, Supplier<AI>>> ais = Arrays.asList(
                     (t) -> ContestTest::anyPlayerAI,
                     (t) -> MockedAI::any);
 

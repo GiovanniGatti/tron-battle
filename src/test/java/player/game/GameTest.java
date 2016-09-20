@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.WithAssertions;
@@ -218,7 +219,7 @@ class GameTest implements WithAssertions {
         }
     }
 
-    private static Function<Supplier<Integer>, Supplier<AI>> anyAIInput() {
+    private static Function<IntSupplier, Supplier<AI>> anyAIInput() {
         return (input) -> MockedAI::any;
     }
 

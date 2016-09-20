@@ -1,6 +1,7 @@
 package player.match;
 
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.WithAssertions;
@@ -108,7 +109,7 @@ class MatchTest implements WithAssertions {
         }
     }
 
-    private static Function<Supplier<Integer>, Supplier<Player.AI>> anyAIInput() {
+    private static Function<IntSupplier, Supplier<Player.AI>> anyAIInput() {
         return (input) -> MockedAI::any;
     }
 }

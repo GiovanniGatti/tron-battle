@@ -193,7 +193,7 @@ public final class Player {
         private final int x;
         private final int y;
 
-        Spot(int x, int y) {
+        public Spot(int x, int y) {
             this.x = x;
             this.y = y;
         }
@@ -260,12 +260,16 @@ public final class Player {
 
         private final ActionsType type;
 
-        Action(ActionsType type) {
+        public Action(ActionsType type) {
             this.type = type;
         }
 
         public String asString() {
             return type.name();
+        }
+
+        public ActionsType getType() {
+            return type;
         }
 
         @Override

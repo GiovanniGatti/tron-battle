@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import com.google.common.base.MoreObjects;
@@ -27,15 +28,15 @@ public class Game implements Callable<Game.GameResult> {
 
     private static final int DEFAULT_NUMBER_OF_MATCHES = 5;
 
-    private final Function<Supplier<Integer>, Supplier<AI>> player;
-    private final Function<Supplier<Integer>, Supplier<AI>> opponent;
+    private final Function<IntSupplier, Supplier<AI>> player;
+    private final Function<IntSupplier, Supplier<AI>> opponent;
     private final Supplier<GameEngine> gameEngine;
     private final int numberOfMatches;
     private final ExecutorService executorService;
 
     public Game(
-            Function<Supplier<Integer>, Supplier<AI>> player,
-            Function<Supplier<Integer>, Supplier<AI>> opponent,
+            Function<IntSupplier, Supplier<AI>> player,
+            Function<IntSupplier, Supplier<AI>> opponent,
             Supplier<GameEngine> gameEngine,
             ExecutorService executorService) {
 
@@ -43,8 +44,8 @@ public class Game implements Callable<Game.GameResult> {
     }
 
     public Game(
-            Function<Supplier<Integer>, Supplier<AI>> player,
-            Function<Supplier<Integer>, Supplier<AI>> opponent,
+            Function<IntSupplier, Supplier<AI>> player,
+            Function<IntSupplier, Supplier<AI>> opponent,
             Supplier<GameEngine> gameEngine,
             ExecutorService executorService,
             int numberOfMatches) {

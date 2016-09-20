@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import com.google.common.base.MoreObjects;
@@ -29,14 +30,14 @@ public final class Contest implements Callable<Contest.ContestResult> {
 
     private static final int DEFAULT_NUMBER_OF_MATCHES = 5;
 
-    private final List<Function<Supplier<Integer>, Supplier<AI>>> ais;
+    private final List<Function<IntSupplier, Supplier<AI>>> ais;
     private final List<Supplier<GameEngine>> gameEngines;
     private final ExecutorService gameExecutorService;
     private final ExecutorService matchExecutorService;
     private final int numberOfMatches;
 
     public Contest(
-            List<Function<Supplier<Integer>, Supplier<AI>>> ais,
+            List<Function<IntSupplier, Supplier<AI>>> ais,
             List<Supplier<GameEngine>> gameEngines,
             ExecutorService gameExecutorService,
             ExecutorService matchExecutorService) {
@@ -45,7 +46,7 @@ public final class Contest implements Callable<Contest.ContestResult> {
     }
 
     public Contest(
-            List<Function<Supplier<Integer>, Supplier<AI>>> ais,
+            List<Function<IntSupplier, Supplier<AI>>> ais,
             List<Supplier<GameEngine>> gameEngines,
             ExecutorService gameExecutorService,
             ExecutorService matchExecutorService,
@@ -69,9 +70,9 @@ public final class Contest implements Callable<Contest.ContestResult> {
         for (Supplier<GameEngine> gameEngine : gameEngines) {
 
             for (int i = 0; i < ais.size() - 1; i++) {
-                Function<Supplier<Integer>, Supplier<AI>> player = ais.get(i);
+                Function<IntSupplier, Supplier<AI>> player = ais.get(i);
                 for (int j = i + 1; j < ais.size(); j++) {
-                    Function<Supplier<Integer>, Supplier<AI>> opponent = ais.get(j);
+                    Function<IntSupplier, Supplier<AI>> opponent = ais.get(j);
                     games.add(
                             new Game(
                                     player,

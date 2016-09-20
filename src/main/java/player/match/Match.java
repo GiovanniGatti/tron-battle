@@ -2,6 +2,7 @@ package player.match;
 
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import player.Player.AI;
@@ -20,8 +21,8 @@ public final class Match implements Callable<Match.MatchResult> {
     private final GameEngine gameEngine;
 
     public Match(
-            Function<Supplier<Integer>, Supplier<AI>> player,
-            Function<Supplier<Integer>, Supplier<AI>> opponent,
+            Function<IntSupplier, Supplier<AI>> player,
+            Function<IntSupplier, Supplier<AI>> opponent,
             Supplier<GameEngine> gameEngine) {
 
         this.gameEngine = gameEngine.get();

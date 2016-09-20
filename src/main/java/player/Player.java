@@ -43,20 +43,20 @@ public final class Player {
                 return new Action[] { new Action(ActionsType.DOWN) };
             }
 
-            Point startPoint = repo.getPlayerStartingPoint();
-            Point currentPoint = repo.getPlayerCurrentPoint();
+            Spot startSpot = repo.getPlayerStartingSpot();
+            Spot currentSpot = repo.getPlayerCurrentSpot();
 
             ActionsType bestMovement = possibleActions.remove(0);
-            Point next = currentPoint.next(bestMovement);
-            double bestScore = startPoint.squareDistTo(next);
+            Spot next = currentSpot.next(bestMovement);
+            double bestScore = startSpot.squareDistTo(next);
             if (repo.getPossibleActionsFor(next).size() < 2) {
                 bestScore = Integer.MAX_VALUE;
             }
 
             for (ActionsType type : possibleActions) {
 
-                next = currentPoint.next(type);
-                double score = startPoint.squareDistTo(next);
+                next = currentSpot.next(type);
+                double score = startSpot.squareDistTo(next);
                 if (repo.getPossibleActionsFor(next).size() < 2) {
                     score = Integer.MAX_VALUE;
                 }
@@ -78,19 +78,19 @@ public final class Player {
 
         private final IntSupplier inputSupplier;
 
-        private final List<Point> playerPoints;
-        private final List<Point> opponentPoints;
+        private final List<Spot> playerSpots;
+        private final List<Spot> opponentSpots;
 
         private int N;
         private int P;
 
-        private Point playerStartingPoint;
-        private Point playerCurrentPoint;
+        private Spot playerStartingSpot;
+        private Spot playerCurrentSpot;
 
         KnowledgeRepo(IntSupplier inputSupplier) {
             this.inputSupplier = inputSupplier;
-            this.playerPoints = new ArrayList<>();
-            this.opponentPoints = new ArrayList<>();
+            this.playerSpots = new ArrayList<>();
+            this.opponentSpots = new ArrayList<>();
         }
 
         void readInput() {
@@ -107,22 +107,22 @@ public final class Player {
                 int Y1 = inputSupplier.getAsInt(); // starting Y coordinate of lightcycle (can be the same as Y0 if you
                 // play before this player)
 
-                Point startPoint = new Point(X0, Y0);
-                Point currentPoint = new Point(X1, Y1);
+                Spot startSpot = new Spot(X0, Y0);
+                Spot currentSpot = new Spot(X1, Y1);
 
                 if ((P == 0) == (i == 0)) {
-                    if (playerPoints.isEmpty() && !currentPoint.equals(startPoint)) {
-                        playerPoints.add(startPoint);
+                    if (playerSpots.isEmpty() && !currentSpot.equals(startSpot)) {
+                        playerSpots.add(startSpot);
                     }
-                    playerPoints.add(currentPoint);
+                    playerSpots.add(currentSpot);
 
-                    playerStartingPoint = startPoint;
-                    playerCurrentPoint = currentPoint;
+                    playerStartingSpot = startSpot;
+                    playerCurrentSpot = currentSpot;
                 } else {
-                    if (opponentPoints.isEmpty() && !currentPoint.equals(startPoint)) {
-                        opponentPoints.add(startPoint);
+                    if (opponentSpots.isEmpty() && !currentSpot.equals(startSpot)) {
+                        opponentSpots.add(startSpot);
                     }
-                    opponentPoints.add(currentPoint);
+                    opponentSpots.add(currentSpot);
                 }
             }
         }
@@ -135,63 +135,63 @@ public final class Player {
             return P;
         }
 
-        public List<Point> getPlayerPoints() {
-            return Collections.unmodifiableList(playerPoints);
+        public List<Spot> getPlayerSpots() {
+            return Collections.unmodifiableList(playerSpots);
         }
 
-        public List<Point> getOpponentPoints() {
-            return Collections.unmodifiableList(opponentPoints);
+        public List<Spot> getOpponentSpots() {
+            return Collections.unmodifiableList(opponentSpots);
         }
 
         public List<ActionsType> getPossibleActions() {
-            return getPossibleActionsFor(playerCurrentPoint);
+            return getPossibleActionsFor(playerCurrentSpot);
         }
 
-        public List<ActionsType> getPossibleActionsFor(Point point) {
+        public List<ActionsType> getPossibleActionsFor(Spot spot) {
             List<ActionsType> possibleActions = new ArrayList<>();
             possibleActions.addAll(Arrays.asList(ActionsType.values()));
 
-            if (point.x - 1 < 0
-                    || playerPoints.contains(new Point(point.x - 1, point.y))
-                    || opponentPoints.contains(new Point(point.x - 1, point.y))) {
+            if (spot.x - 1 < 0
+                    || playerSpots.contains(new Spot(spot.x - 1, spot.y))
+                    || opponentSpots.contains(new Spot(spot.x - 1, spot.y))) {
                 possibleActions.remove(ActionsType.LEFT);
             }
 
-            if (point.x + 1 > (GRID_X - 1)
-                    || playerPoints.contains(new Point(point.x + 1, point.y))
-                    || opponentPoints.contains(new Point(point.x + 1, point.y))) {
+            if (spot.x + 1 > (GRID_X - 1)
+                    || playerSpots.contains(new Spot(spot.x + 1, spot.y))
+                    || opponentSpots.contains(new Spot(spot.x + 1, spot.y))) {
                 possibleActions.remove(ActionsType.RIGHT);
             }
 
-            if (point.y - 1 < 0
-                    || playerPoints.contains(new Point(point.x, point.y - 1))
-                    || opponentPoints.contains(new Point(point.x, point.y - 1))) {
+            if (spot.y - 1 < 0
+                    || playerSpots.contains(new Spot(spot.x, spot.y - 1))
+                    || opponentSpots.contains(new Spot(spot.x, spot.y - 1))) {
                 possibleActions.remove(ActionsType.UP);
             }
 
-            if (point.y + 1 > (GRID_Y - 1)
-                    || playerPoints.contains(new Point(point.x, point.y + 1))
-                    || opponentPoints.contains(new Point(point.x, point.y + 1))) {
+            if (spot.y + 1 > (GRID_Y - 1)
+                    || playerSpots.contains(new Spot(spot.x, spot.y + 1))
+                    || opponentSpots.contains(new Spot(spot.x, spot.y + 1))) {
                 possibleActions.remove(ActionsType.DOWN);
             }
 
             return possibleActions;
         }
 
-        public Point getPlayerStartingPoint() {
-            return playerStartingPoint;
+        public Spot getPlayerStartingSpot() {
+            return playerStartingSpot;
         }
 
-        public Point getPlayerCurrentPoint() {
-            return playerCurrentPoint;
+        public Spot getPlayerCurrentSpot() {
+            return playerCurrentSpot;
         }
     }
 
-    static class Point {
+    static class Spot {
         private final int x;
         private final int y;
 
-        Point(int x, int y) {
+        Spot(int x, int y) {
             this.x = x;
             this.y = y;
         }
@@ -212,25 +212,25 @@ public final class Player {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            Point point = (Point) o;
-            return x == point.x &&
-                    y == point.y;
+            Spot spot = (Spot) o;
+            return x == spot.x &&
+                    y == spot.y;
         }
 
-        public double squareDistTo(Point another) {
+        public double squareDistTo(Spot another) {
             return (x - another.x) * (x - another.x) + (y - another.y) * (y - another.y);
         }
 
-        public Point next(ActionsType type) {
+        public Spot next(ActionsType type) {
             switch (type) {
             case UP:
-                return new Point(x, y - 1);
+                return new Spot(x, y - 1);
             case DOWN:
-                return new Point(x, y + 1);
+                return new Spot(x, y + 1);
             case LEFT:
-                return new Point(x - 1, y);
+                return new Spot(x - 1, y);
             case RIGHT:
-                return new Point(x + 1, y);
+                return new Spot(x + 1, y);
             default:
                 throw new IllegalStateException("Unkown action type " + type);
             }

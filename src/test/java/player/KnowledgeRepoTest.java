@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import player.Player.ActionsType;
 import player.Player.KnowledgeRepo;
-import player.Player.Point;
+import player.Player.Spot;
 
 @DisplayName("A knowledge repository")
 class KnowledgeRepoTest implements WithAssertions {
@@ -22,7 +22,7 @@ class KnowledgeRepoTest implements WithAssertions {
     @DisplayName("reads the correct number of players")
     void loadsCorrectNumberOfPlayers() {
         PlayerInputProvider inputProvider =
-                new PlayerInputProvider(3, 0, anyPoint(), new Point[] { anyPoint(), anyPoint() });
+                new PlayerInputProvider(3, 0, anyPoint(), new Spot[] { anyPoint(), anyPoint() });
         KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
         repo.readInput();
 
@@ -33,7 +33,7 @@ class KnowledgeRepoTest implements WithAssertions {
     @DisplayName("reads the correct player id")
     void loadsCorrectPlayerId() {
         PlayerInputProvider inputProvider =
-                new PlayerInputProvider(3, 2, anyPoint(), new Point[] { anyPoint(), anyPoint() });
+                new PlayerInputProvider(3, 2, anyPoint(), new Spot[] { anyPoint(), anyPoint() });
         KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
         repo.readInput();
 
@@ -43,22 +43,22 @@ class KnowledgeRepoTest implements WithAssertions {
     @Test
     @DisplayName("reads both player and opponent points")
     void loadsAllPlayerPoints() {
-        Point p0 = new Point(0, 1);
-        Point p1 = new Point(0, 2);
+        Spot p0 = new Spot(0, 1);
+        Spot p1 = new Spot(0, 2);
 
-        Point opponentP0 = new Point(0, 3);
-        Point opponentP1 = new Point(0, 4);
+        Spot opponentP0 = new Spot(0, 3);
+        Spot opponentP1 = new Spot(0, 4);
 
         PlayerInputProvider inputProvider =
                 new PlayerInputProvider(
                         2, 1,
                         p0, p1,
-                        new Point[] { opponentP0 }, new Point[] { opponentP1 });
+                        new Spot[] { opponentP0 }, new Spot[] { opponentP1 });
         KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
         repo.readInput();
 
-        assertThat(repo.getPlayerPoints()).containsOnly(p0, p1);
-        assertThat(repo.getOpponentPoints()).containsOnly(opponentP0, opponentP1);
+        assertThat(repo.getPlayerSpots()).containsOnly(p0, p1);
+        assertThat(repo.getOpponentSpots()).containsOnly(opponentP0, opponentP1);
     }
 
     @Nested
@@ -68,10 +68,10 @@ class KnowledgeRepoTest implements WithAssertions {
         @Test
         @DisplayName("returns right or down if player is at the upper left corner")
         void onLeftUpperCorner() {
-            Point player = new Point(0, 0);
-            Point opponent = new Point(5, 10);
+            Spot player = new Spot(0, 0);
+            Spot opponent = new Spot(5, 10);
 
-            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Point[] { opponent });
+            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
             repo.readInput();
             List<ActionsType> actions = repo.getPossibleActions();
@@ -82,10 +82,10 @@ class KnowledgeRepoTest implements WithAssertions {
         @Test
         @DisplayName("returns up or right if player is at left lower corner")
         void onLeftLowerCorner() {
-            Point player = new Point(0, 19);
-            Point opponent = new Point(5, 10);
+            Spot player = new Spot(0, 19);
+            Spot opponent = new Spot(5, 10);
 
-            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Point[] { opponent });
+            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
             repo.readInput();
             List<ActionsType> actions = repo.getPossibleActions();
@@ -96,10 +96,10 @@ class KnowledgeRepoTest implements WithAssertions {
         @org.junit.jupiter.api.Test
         @DisplayName("returns left or down if player is at right upper corner")
         void onRightUpperCorner() {
-            Point player = new Point(29, 0);
-            Point opponent = new Point(5, 10);
+            Spot player = new Spot(29, 0);
+            Spot opponent = new Spot(5, 10);
 
-            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Point[] { opponent });
+            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
             repo.readInput();
             List<ActionsType> actions = repo.getPossibleActions();
@@ -110,10 +110,10 @@ class KnowledgeRepoTest implements WithAssertions {
         @org.junit.jupiter.api.Test
         @DisplayName("returns left or up if player is at right lower corner")
         void onRightLowerCorner() {
-            Point player = new Point(29, 19);
-            Point opponent = new Point(5, 10);
+            Spot player = new Spot(29, 19);
+            Spot opponent = new Spot(5, 10);
 
-            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Point[] { opponent });
+            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
             repo.readInput();
             List<ActionsType> actions = repo.getPossibleActions();
@@ -129,8 +129,8 @@ class KnowledgeRepoTest implements WithAssertions {
         PlayerInputProvider(
                 int N,
                 int P,
-                Point playerP0,
-                Point[] opponentsP0) {
+                Spot playerP0,
+                Spot[] opponentsP0) {
 
             this(N, P, playerP0, playerP0, opponentsP0, opponentsP0);
         }
@@ -138,10 +138,10 @@ class KnowledgeRepoTest implements WithAssertions {
         PlayerInputProvider(
                 int N,
                 int P,
-                Point playerP0,
-                Point playerP1,
-                Point[] opponentsP0,
-                Point[] opponentsP1) {
+                Spot playerP0,
+                Spot playerP1,
+                Spot[] opponentsP0,
+                Spot[] opponentsP1) {
 
             Preconditions.checkNotNullOrEmpty(opponentsP0);
 
@@ -150,22 +150,22 @@ class KnowledgeRepoTest implements WithAssertions {
             inputStream.add(N);
             inputStream.add(P);
 
-            Point[] points = new Point[2 * N];
+            Spot[] spots = new Spot[2 * N];
 
             for (int i = 0; i < N; i++) {
                 if (i == P) {
-                    points[2 * i] = playerP0;
-                    points[2 * i + 1] = playerP1;
+                    spots[2 * i] = playerP0;
+                    spots[2 * i + 1] = playerP1;
                 } else if (i < P) {
-                    points[2 * i] = opponentsP0[i];
-                    points[2 * i + 1] = opponentsP1[i];
+                    spots[2 * i] = opponentsP0[i];
+                    spots[2 * i + 1] = opponentsP1[i];
                 } else {
-                    points[2 * i] = opponentsP0[i - 1];
-                    points[2 * i + 1] = opponentsP1[i - 1];
+                    spots[2 * i] = opponentsP0[i - 1];
+                    spots[2 * i + 1] = opponentsP1[i - 1];
                 }
             }
 
-            for (Point p : points) {
+            for (Spot p : spots) {
                 inputStream.add(p.getX());
                 inputStream.add(p.getY());
             }
@@ -176,9 +176,9 @@ class KnowledgeRepoTest implements WithAssertions {
         }
     }
 
-    private static Point anyPoint() {
+    private static Spot anyPoint() {
         Random random = new Random();
-        return new Point(random.nextInt(KnowledgeRepo.GRID_X), random.nextInt(KnowledgeRepo.GRID_Y));
+        return new Spot(random.nextInt(KnowledgeRepo.GRID_X), random.nextInt(KnowledgeRepo.GRID_Y));
     }
 
 }

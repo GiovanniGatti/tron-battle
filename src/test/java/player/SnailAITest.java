@@ -17,7 +17,7 @@ import org.mockito.Mockito;
 
 import player.Player.Action;
 import player.Player.KnowledgeRepo;
-import player.Player.Point;
+import player.Player.Spot;
 import player.Player.SnailAI;
 
 @DisplayName("The snail AI")
@@ -30,12 +30,12 @@ public class SnailAITest implements WithAssertions {
 
         when(repo.getN()).thenReturn(2);
         when(repo.getP()).thenReturn(1);
-        when(repo.getPlayerStartingPoint()).thenReturn(new Point(3, 3));
-        when(repo.getPlayerCurrentPoint()).thenReturn(new Point(4, 3));
+        when(repo.getPlayerStartingSpot()).thenReturn(new Spot(3, 3));
+        when(repo.getPlayerCurrentSpot()).thenReturn(new Spot(4, 3));
 
         when(repo.getPossibleActions()).thenReturn(new ArrayList<>(Arrays.asList(UP, RIGHT)));
-        when(repo.getPossibleActionsFor(new Point(4, 2))).thenReturn(new ArrayList<>(Arrays.asList(UP, LEFT, RIGHT)));
-        when(repo.getPossibleActionsFor(new Point(5, 3))).thenReturn(new ArrayList<>(Arrays.asList(UP, DOWN, RIGHT)));
+        when(repo.getPossibleActionsFor(new Spot(4, 2))).thenReturn(new ArrayList<>(Arrays.asList(UP, LEFT, RIGHT)));
+        when(repo.getPossibleActionsFor(new Spot(5, 3))).thenReturn(new ArrayList<>(Arrays.asList(UP, DOWN, RIGHT)));
 
         SnailAI ai = new SnailAI(repo);
 
@@ -54,13 +54,13 @@ public class SnailAITest implements WithAssertions {
         when(repo.getN()).thenReturn(2);
         when(repo.getP()).thenReturn(1);
 
-        when(repo.getPlayerStartingPoint()).thenReturn(new Point(3, 3));
-        when(repo.getPlayerCurrentPoint()).thenReturn(new Point(4, 2));
+        when(repo.getPlayerStartingSpot()).thenReturn(new Spot(3, 3));
+        when(repo.getPlayerCurrentSpot()).thenReturn(new Spot(4, 2));
 
         when(repo.getPossibleActions()).thenReturn(new ArrayList<>(Arrays.asList(UP, LEFT, RIGHT)));
-        when(repo.getPossibleActionsFor(new Point(4, 1))).thenReturn(new ArrayList<>(Arrays.asList(UP, LEFT, RIGHT)));
-        when(repo.getPossibleActionsFor(new Point(3, 2))).thenReturn(new ArrayList<>(Arrays.asList(UP, LEFT)));
-        when(repo.getPossibleActionsFor(new Point(5, 2))).thenReturn(new ArrayList<>(Arrays.asList(UP, DOWN, RIGHT)));
+        when(repo.getPossibleActionsFor(new Spot(4, 1))).thenReturn(new ArrayList<>(Arrays.asList(UP, LEFT, RIGHT)));
+        when(repo.getPossibleActionsFor(new Spot(3, 2))).thenReturn(new ArrayList<>(Arrays.asList(UP, LEFT)));
+        when(repo.getPossibleActionsFor(new Spot(5, 2))).thenReturn(new ArrayList<>(Arrays.asList(UP, DOWN, RIGHT)));
 
         SnailAI ai = new SnailAI(repo);
 
@@ -79,12 +79,12 @@ public class SnailAITest implements WithAssertions {
         when(repo.getN()).thenReturn(2);
         when(repo.getP()).thenReturn(1);
 
-        when(repo.getPlayerStartingPoint()).thenReturn(new Point(3, 3));
-        when(repo.getPlayerCurrentPoint()).thenReturn(new Point(4, 2));
+        when(repo.getPlayerStartingSpot()).thenReturn(new Spot(3, 3));
+        when(repo.getPlayerCurrentSpot()).thenReturn(new Spot(4, 2));
 
         when(repo.getPossibleActions()).thenReturn(new ArrayList<>(Arrays.asList(UP, RIGHT)));
-        when(repo.getPossibleActionsFor(new Point(4, 1))).thenReturn(new ArrayList<>(Arrays.asList(UP, RIGHT)));
-        when(repo.getPossibleActionsFor(new Point(5, 2))).thenReturn(new ArrayList<>(Arrays.asList(UP, DOWN, RIGHT)));
+        when(repo.getPossibleActionsFor(new Spot(4, 1))).thenReturn(new ArrayList<>(Arrays.asList(UP, RIGHT)));
+        when(repo.getPossibleActionsFor(new Spot(5, 2))).thenReturn(new ArrayList<>(Arrays.asList(UP, DOWN, RIGHT)));
 
         SnailAI ai = new SnailAI(repo);
 
@@ -103,8 +103,8 @@ public class SnailAITest implements WithAssertions {
         when(repo.getN()).thenReturn(2);
         when(repo.getP()).thenReturn(1);
 
-        when(repo.getPlayerStartingPoint()).thenReturn(new Point(3, 3));
-        when(repo.getPlayerCurrentPoint()).thenReturn(new Point(4, 2));
+        when(repo.getPlayerStartingSpot()).thenReturn(new Spot(3, 3));
+        when(repo.getPlayerCurrentSpot()).thenReturn(new Spot(4, 2));
 
         when(repo.getPossibleActions()).thenReturn(Collections.emptyList());
 
@@ -125,13 +125,13 @@ public class SnailAITest implements WithAssertions {
         when(repo.getN()).thenReturn(2);
         when(repo.getP()).thenReturn(1);
 
-        when(repo.getPlayerStartingPoint()).thenReturn(new Point(3, 3));
-        when(repo.getPlayerCurrentPoint()).thenReturn(new Point(5, 5));
+        when(repo.getPlayerStartingSpot()).thenReturn(new Spot(3, 3));
+        when(repo.getPlayerCurrentSpot()).thenReturn(new Spot(5, 5));
 
         when(repo.getPossibleActions()).thenReturn(new ArrayList<>(Arrays.asList(LEFT, RIGHT)));
 
-        when(repo.getPossibleActionsFor(new Point(4, 5))).thenReturn(new ArrayList<>(Collections.singletonList(LEFT)));
-        when(repo.getPossibleActionsFor(new Point(6, 5))).thenReturn(Arrays.asList(UP, RIGHT));
+        when(repo.getPossibleActionsFor(new Spot(4, 5))).thenReturn(new ArrayList<>(Collections.singletonList(LEFT)));
+        when(repo.getPossibleActionsFor(new Spot(6, 5))).thenReturn(Arrays.asList(UP, RIGHT));
 
         SnailAI ai = new SnailAI(repo);
 
@@ -150,13 +150,13 @@ public class SnailAITest implements WithAssertions {
         when(repo.getN()).thenReturn(2);
         when(repo.getP()).thenReturn(1);
 
-        when(repo.getPlayerStartingPoint()).thenReturn(new Point(7, 1));
-        when(repo.getPlayerCurrentPoint()).thenReturn(new Point(4, 0));
+        when(repo.getPlayerStartingSpot()).thenReturn(new Spot(7, 1));
+        when(repo.getPlayerCurrentSpot()).thenReturn(new Spot(4, 0));
 
         when(repo.getPossibleActions()).thenReturn(new ArrayList<>(Arrays.asList(LEFT, RIGHT)));
 
-        when(repo.getPossibleActionsFor(new Point(5, 0))).thenReturn(Collections.emptyList());
-        when(repo.getPossibleActionsFor(new Point(3, 0))).thenReturn(Arrays.asList(DOWN, LEFT));
+        when(repo.getPossibleActionsFor(new Spot(5, 0))).thenReturn(Collections.emptyList());
+        when(repo.getPossibleActionsFor(new Spot(3, 0))).thenReturn(Arrays.asList(DOWN, LEFT));
 
         SnailAI ai = new SnailAI(repo);
 

@@ -18,7 +18,7 @@ public final class Player {
         AI ai = new SnailAI(repo);
 
         while (true) {
-            repo.readInput();
+            ai.updateRepository();
             Action[] actions = ai.play();
             for (Action action : actions) {
                 System.out.println(action.asString());
@@ -31,8 +31,11 @@ public final class Player {
      */
     static class SnailAI extends AI {
 
+        private KnowledgeRepo repo;
+
         public SnailAI(KnowledgeRepo knowledgeRepo) {
-            super(knowledgeRepo);
+            super(knowledgeRepo::update);
+            this.repo = knowledgeRepo;
         }
 
         @Override
@@ -71,12 +74,10 @@ public final class Player {
         }
     }
 
-    static class KnowledgeRepo {
+    static class KnowledgeRepo extends Repository {
 
         static final int GRID_X = 30;
         static final int GRID_Y = 20;
-
-        private final IntSupplier inputSupplier;
 
         private final List<Spot> playerSpots;
         private final List<Spot> opponentSpots;
@@ -88,23 +89,24 @@ public final class Player {
         private Spot playerCurrentSpot;
 
         KnowledgeRepo(IntSupplier inputSupplier) {
-            this.inputSupplier = inputSupplier;
+            super(inputSupplier);
             this.playerSpots = new ArrayList<>();
             this.opponentSpots = new ArrayList<>();
         }
 
-        void readInput() {
-            N = inputSupplier.getAsInt(); // total number of players (2 to 4).
-            P = inputSupplier.getAsInt(); // your player number (0 to 3).
+        @Override
+        public void update() {
+            N = readInput(); // total number of players (2 to 4).
+            P = readInput(); // your player number (0 to 3).
 
             for (int i = 0; i < N; i++) {
 
-                int X0 = inputSupplier.getAsInt(); // starting X coordinate of lightcycle (or -1)
-                int Y0 = inputSupplier.getAsInt(); // starting Y coordinate of lightcycle (or -1)
+                int X0 = readInput(); // starting X coordinate of lightcycle (or -1)
+                int Y0 = readInput(); // starting Y coordinate of lightcycle (or -1)
 
-                int X1 = inputSupplier.getAsInt(); // starting X coordinate of lightcycle (can be the same as X0 if you
+                int X1 = readInput(); // starting X coordinate of lightcycle (can be the same as X0 if you
                 // play before this player)
-                int Y1 = inputSupplier.getAsInt(); // starting Y coordinate of lightcycle (can be the same as Y0 if you
+                int Y1 = readInput(); // starting Y coordinate of lightcycle (can be the same as Y0 if you
                 // play before this player)
 
                 Spot startSpot = new Spot(X0, Y0);
@@ -187,7 +189,7 @@ public final class Player {
         }
     }
 
-    static class Spot {
+    public static class Spot {
         private final int x;
         private final int y;
 
@@ -296,30 +298,34 @@ public final class Player {
     public static abstract class AI {
 
         private final Map<String, Object> conf;
-        protected final KnowledgeRepo repo;
+        private final RepositoryUpdater updater;
 
         /**
          * Builds an AI with specified configuration.<br>
          * It is recommended to create a default configuration.
          */
-        public AI(Map<String, Object> conf, KnowledgeRepo knowledgeRepo) {
+        public AI(Map<String, Object> conf, RepositoryUpdater updater) {
             this.conf = Collections.unmodifiableMap(conf);
-            this.repo = knowledgeRepo;
+            this.updater = updater;
         }
 
         /**
          * Builds an AI with an empty configuration.
          */
-        public AI(KnowledgeRepo knowledgeRepo) {
-            this(Collections.emptyMap(), knowledgeRepo);
+        public AI(RepositoryUpdater updater) {
+            this(Collections.emptyMap(), updater);
         }
 
         /**
          * Implements the IA algorithm
-         *
+         * 
          * @return the best ordered set of actions found
          */
         public abstract Action[] play();
+
+        public void updateRepository() {
+            updater.update();
+        }
 
         public Map<String, Object> getConf() {
             return conf;
@@ -342,5 +348,27 @@ public final class Player {
         public final int hashCode() {
             return Objects.hash(conf, getClass());
         }
+    }
+
+    public static abstract class Repository {
+
+        private final IntSupplier inputSupplier;
+
+        protected Repository(IntSupplier inputSupplier) {
+            this.inputSupplier = inputSupplier;
+        }
+
+        /**
+         * Reads and parse input stream.
+         */
+        public abstract void update();
+
+        protected int readInput() {
+            return inputSupplier.getAsInt();
+        }
+    }
+
+    public interface RepositoryUpdater {
+        void update();
     }
 }

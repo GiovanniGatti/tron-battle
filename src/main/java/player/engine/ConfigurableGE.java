@@ -1,13 +1,13 @@
 package player.engine;
 
+import static player.Player.AI;
+
 import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 
 import com.google.common.collect.ImmutableMap;
-
-import player.Player.Action;
 
 abstract class ConfigurableGE implements GameEngine {
 
@@ -30,7 +30,7 @@ abstract class ConfigurableGE implements GameEngine {
         return conf;
     }
 
-    protected abstract Winner runRound(Action[] playerActions, Action[] opponentActions);
+    protected abstract Winner runRound(AI player, AI opponent);
 
     void toPlayerInput(int... values) {
         for (int value : values) {
@@ -45,8 +45,8 @@ abstract class ConfigurableGE implements GameEngine {
     }
 
     @Override
-    public void run(Action[] playerActions, Action[] opponentActions) {
-        this.winner = runRound(playerActions, opponentActions);
+    public void run(AI player, AI opponent) {
+        this.winner = runRound(player, opponent);
         rounds++;
     }
 

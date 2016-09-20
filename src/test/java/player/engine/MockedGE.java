@@ -8,7 +8,7 @@ import java.util.Random;
 
 import com.google.common.base.MoreObjects;
 
-import player.Player;
+import player.Player.AI;
 
 public final class MockedGE {
 
@@ -172,7 +172,7 @@ public final class MockedGE {
         }
 
         @Override
-        public void run(Player.Action[] playerActions, Player.Action[] opponentActions) {
+        public void run(AI player, AI opponent) {
             // ILB
         }
 

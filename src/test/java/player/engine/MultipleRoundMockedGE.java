@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import player.Player;
+import player.Player.AI;
 import player.engine.MockedGE.Builder;
 
 public class MultipleRoundMockedGE implements GameEngine {
@@ -34,7 +34,7 @@ public class MultipleRoundMockedGE implements GameEngine {
     }
 
     @Override
-    public void run(Player.Action[] playerActions, Player.Action[] opponentActions) {
+    public void run(AI player, AI opponentActions) {
         runCount++;
         currentState = rounds.next();
     }

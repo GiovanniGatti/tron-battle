@@ -5,7 +5,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import player.Player.AI;
-import player.Player.Action;
 import player.engine.GameEngine;
 import player.engine.Winner;
 
@@ -35,11 +34,7 @@ public final class Match implements Callable<Match.MatchResult> {
         gameEngine.start();
 
         do {
-            Action[] playerActions = player.play();
-            Action[] opponentActions = opponent.play();
-
-            gameEngine.run(playerActions, opponentActions);
-
+            gameEngine.run(player, opponent);
         } while (gameEngine.getWinner() == Winner.ON_GOING);
 
         return new MatchResult(

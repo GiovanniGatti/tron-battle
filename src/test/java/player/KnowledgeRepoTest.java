@@ -24,7 +24,7 @@ class KnowledgeRepoTest implements WithAssertions {
         PlayerInputProvider inputProvider =
                 new PlayerInputProvider(3, 0, anyPoint(), new Spot[] { anyPoint(), anyPoint() });
         KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
-        repo.readInput();
+        repo.update();
 
         assertThat(repo.getN()).isEqualTo(3);
     }
@@ -35,7 +35,7 @@ class KnowledgeRepoTest implements WithAssertions {
         PlayerInputProvider inputProvider =
                 new PlayerInputProvider(3, 2, anyPoint(), new Spot[] { anyPoint(), anyPoint() });
         KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
-        repo.readInput();
+        repo.update();
 
         assertThat(repo.getP()).isEqualTo(2);
     }
@@ -55,7 +55,7 @@ class KnowledgeRepoTest implements WithAssertions {
                         p0, p1,
                         new Spot[] { opponentP0 }, new Spot[] { opponentP1 });
         KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
-        repo.readInput();
+        repo.update();
 
         assertThat(repo.getPlayerSpots()).containsOnly(p0, p1);
         assertThat(repo.getOpponentSpots()).containsOnly(opponentP0, opponentP1);
@@ -73,7 +73,7 @@ class KnowledgeRepoTest implements WithAssertions {
 
             PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
-            repo.readInput();
+            repo.update();
             List<ActionsType> actions = repo.getPossibleActions();
 
             assertThat(actions).containsOnly(ActionsType.DOWN, ActionsType.RIGHT);
@@ -87,7 +87,7 @@ class KnowledgeRepoTest implements WithAssertions {
 
             PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
-            repo.readInput();
+            repo.update();
             List<ActionsType> actions = repo.getPossibleActions();
 
             assertThat(actions).containsOnly(ActionsType.UP, ActionsType.RIGHT);
@@ -101,7 +101,7 @@ class KnowledgeRepoTest implements WithAssertions {
 
             PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
-            repo.readInput();
+            repo.update();
             List<ActionsType> actions = repo.getPossibleActions();
 
             assertThat(actions).containsOnly(ActionsType.DOWN, ActionsType.LEFT);
@@ -115,7 +115,7 @@ class KnowledgeRepoTest implements WithAssertions {
 
             PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
-            repo.readInput();
+            repo.update();
             List<ActionsType> actions = repo.getPossibleActions();
 
             assertThat(actions).containsOnly(ActionsType.UP, ActionsType.LEFT);

@@ -1,12 +1,14 @@
 package player;
 
-import com.google.common.base.MoreObjects;
-import org.mockito.Mockito;
-import player.Player.AI;
-import player.Player.Action;
-
 import java.util.Collections;
 import java.util.Map;
+
+import org.mockito.Mockito;
+
+import com.google.common.base.MoreObjects;
+
+import player.Player.AI;
+import player.Player.Action;
 
 public final class MockedAI {
 
@@ -41,7 +43,7 @@ public final class MockedAI {
 
         private Builder() {
             this.conf = Collections.emptyMap();
-            this.actions = new Action[]{Mockito.mock(Action.class)};
+            this.actions = new Action[] { Mockito.mock(Action.class) };
         }
 
         public Builder withConf(Map<String, Object> conf) {
@@ -64,7 +66,7 @@ public final class MockedAI {
         private final Action[] actions;
 
         private MockedArtificialIntelligence(Map<String, Object> conf, Action[] actions) {
-            super(conf, null);
+            super(conf, MockedArtificialIntelligence::noOp);
             this.actions = actions;
         }
 
@@ -79,6 +81,10 @@ public final class MockedAI {
                     .add("conf", getConf())
                     .add("actions", actions)
                     .toString();
+        }
+
+        private static void noOp() {
+            // ILB
         }
     }
 }

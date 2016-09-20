@@ -1,6 +1,6 @@
 package player.engine;
 
-import player.Player.Action;
+import static player.Player.AI;
 
 public interface GameEngine {
 
@@ -13,7 +13,7 @@ public interface GameEngine {
     /**
      * Computes the new match state based on the players' actions
      */
-    void run(Action[] playerActions, Action[] opponentActions);
+    void run(AI player, AI opponent);
 
     /**
      * 

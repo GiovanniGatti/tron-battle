@@ -1,8 +1,5 @@
 package player.match;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -10,12 +7,9 @@ import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import player.MockedAI;
 import player.Player;
-import player.Player.Action;
 import player.engine.GameEngine;
 import player.engine.MockedGE;
 import player.engine.MultipleRoundMockedGE;
@@ -59,34 +53,6 @@ class MatchTest implements WithAssertions {
         match.call();
 
         assertThat(gameEngine.getRunCount()).isEqualTo(3);
-    }
-
-    @Test
-    @DisplayName("consists of providing AI input and them playing their output actions")
-    void playAIActions() {
-
-        Action playerAction = Mockito.mock(Action.class);
-        Function<Supplier<Integer>, Supplier<Player.AI>> playerAIInput =
-                (input) -> () -> MockedAI.anyWithActions(playerAction);
-
-        Action opponentAction = Mockito.mock(Action.class);
-        Function<Supplier<Integer>, Supplier<Player.AI>> opponentAIInput =
-                (input) -> () -> MockedAI.anyWithActions(opponentAction);
-
-        GameEngine gameEngine = Mockito.mock(GameEngine.class);
-        when(gameEngine.getWinner()).thenReturn(Winner.PLAYER);
-        Supplier<GameEngine> gameEngineBuild = () -> gameEngine;
-
-        Match match = new Match(playerAIInput, opponentAIInput, gameEngineBuild);
-
-        match.call();
-
-        ArgumentCaptor<Action[]> playerActions = ArgumentCaptor.forClass(Action[].class);
-        ArgumentCaptor<Action[]> opponentActions = ArgumentCaptor.forClass(Action[].class);
-        verify(gameEngine).run(playerActions.capture(), opponentActions.capture());
-
-        assertThat(playerAction).isEqualTo(playerActions.getValue()[0]);
-        assertThat(opponentAction).isEqualTo(opponentActions.getValue()[0]);
     }
 
     @Nested

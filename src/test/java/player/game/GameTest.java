@@ -225,12 +225,16 @@ class GameTest implements WithAssertions {
     private static class AnotherAI extends AI {
 
         public AnotherAI() {
-            super(null);
+            super(AnotherAI::noOp);
         }
 
         @Override
         public Action[] play() {
             return new Action[0];
+        }
+
+        private static void noOp() {
+            // ILB
         }
     }
 
@@ -242,7 +246,7 @@ class GameTest implements WithAssertions {
         }
 
         @Override
-        public void run(Action[] playerActions, Action[] opponentActions) {
+        public void run(AI player, AI opponent) {
 
         }
 

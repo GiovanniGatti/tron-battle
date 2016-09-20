@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMap;
 
-import player.Player;
+import player.Player.AI;
 
 @DisplayName("A configure game engine")
 class ConfigurableGETest implements WithAssertions {
@@ -149,7 +149,7 @@ class ConfigurableGETest implements WithAssertions {
         }
 
         @Override
-        protected Winner runRound(Player.Action[] playerActions, Player.Action[] opponentActions) {
+        protected Winner runRound(AI playerActions, AI opponentActions) {
             return winner;
         }
     }

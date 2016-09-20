@@ -4,14 +4,18 @@ import java.util.List;
 import java.util.Random;
 
 import player.Player.AI;
+import player.Player.KnowledgeRepo;
 
 /**
  * Dumbest AI possible: it does random movements considering all available possibilities
  */
 class RandomAI extends AI {
 
-    public RandomAI(Player.KnowledgeRepo knowledgeRepo) {
-        super(knowledgeRepo);
+    private final KnowledgeRepo repo;
+
+    public RandomAI(KnowledgeRepo knowledgeRepo) {
+        super(knowledgeRepo::update);
+        this.repo = knowledgeRepo;
     }
 
     @Override

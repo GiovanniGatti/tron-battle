@@ -117,7 +117,7 @@ public final class Player {
     static class LongestSequenceAI extends GeneticAI {
 
         public LongestSequenceAI(InputRepository repository) {
-            super(16, 64, 128, .7, .01, repository, LongestSequenceAI::evaluate);
+            super(16, 64, 128, .7, .001, repository, LongestSequenceAI::evaluate);
         }
 
         private static double evaluate(TronGameEngine engine, int playerN, ActionsType[] actions) {

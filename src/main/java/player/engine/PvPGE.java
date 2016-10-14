@@ -1,141 +1,119 @@
 package player.engine;
 
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.function.Supplier;
+import java.util.Objects;
+import java.util.function.Consumer;
 
+import player.Player;
 import player.Player.AI;
 import player.Player.Action;
 import player.Player.Spot;
+import player.Player.TronGameEngine;
+import player.Player.TronLightCycle;
 
 public class PvPGE extends ConfigurableGE {
 
-    static final int GRID_X = 30;
-    static final int GRID_Y = 20;
+    private final TronGameEngine gameEngine;
+    private final Spot[] startSpots;
 
     private final boolean playerFirst;
-    private final Set<Spot> spotHistory;
-
-    private Spot playerStartSpot;
-    private Spot opponentStartSpot;
-
-    private Spot playerCurrentSpot;
-    private Spot opponentCurrentSpot;
 
     private int playerScore;
     private int opponentScore;
 
-    private final Supplier<Spot> spotGenerator;
-
-    PvPGE(boolean playerFirst, Supplier<Spot> spotGenerator) {
+    PvPGE(boolean playerFirst, TronGameEngine gameEngine) {
         super(Collections.emptyMap());
         this.playerFirst = playerFirst;
-        this.spotHistory = new HashSet<>();
-        this.spotGenerator = spotGenerator;
+        this.gameEngine = gameEngine;
+        this.startSpots = new Spot[] { gameEngine.getStart(0), gameEngine.getStart(1) };
         this.playerScore = 0;
         this.opponentScore = 0;
     }
 
-    public PvPGE() {
-        this(new Random());
-    }
-
-    private PvPGE(Random random) {
-        this(random.nextBoolean(), () -> new Spot(random.nextInt(GRID_X), random.nextInt(GRID_Y)));
+    public PvPGE(boolean playerFirst, TronLightCycle... lightCycles) {
+        this(playerFirst, new TronGameEngine(lightCycles));
     }
 
     @Override
     public void start() {
-        playerStartSpot = spotGenerator.get();
-        playerCurrentSpot = playerStartSpot;
-        spotHistory.add(playerStartSpot);
-
-        opponentStartSpot = spotGenerator.get();
-        opponentCurrentSpot = opponentStartSpot;
-        spotHistory.add(opponentStartSpot);
+        // ILB
     }
 
     @Override
     protected Winner runRound(AI player, AI opponent) {
-        if (playerFirst) {
-            Winner winner = playerRound(player);
-            if (winner != Winner.ON_GOING) {
-                return winner;
-            }
-
-            return opponentRound(opponent);
-        } else {
-            Winner winner = opponentRound(opponent);
-            if (winner != Winner.ON_GOING) {
-                return winner;
-            }
-
-            return playerRound(player);
-        }
-    }
-
-    private Winner playerRound(AI player) {
-        toPlayerInput(2, playerFirst ? 0 : 1);
+        int firstId, secondId;
+        AI first, second;
+        Consumer<Spot> firstInput, secondInput;
+        Consumer<Integer> metadataFirstInput, metadataSecondInput;
 
         if (playerFirst) {
-            toPlayerInput(playerStartSpot);
-            toPlayerInput(playerCurrentSpot);
+            first = player;
+            firstInput = this::toPlayerInput;
+            metadataFirstInput = this::toPlayerInput;
+            firstId = 0;
 
-            toPlayerInput(opponentStartSpot);
-            toPlayerInput(opponentCurrentSpot);
+            second = opponent;
+            secondInput = this::toOpponentInput;
+            metadataSecondInput = this::toOpponentInput;
+            secondId = 1;
         } else {
-            toPlayerInput(opponentStartSpot);
-            toPlayerInput(opponentCurrentSpot);
+            first = opponent;
+            firstInput = this::toOpponentInput;
+            metadataFirstInput = this::toOpponentInput;
+            firstId = 1;
 
-            toPlayerInput(playerStartSpot);
-            toPlayerInput(playerCurrentSpot);
+            second = player;
+            secondInput = this::toPlayerInput;
+            metadataSecondInput = this::toPlayerInput;
+            secondId = 0;
         }
 
-        player.updateRepository();
+        metadataFirstInput.accept(2);
+        metadataFirstInput.accept(0);
 
-        Action playerAction = player.play()[0];
-        playerCurrentSpot = playerCurrentSpot.next(playerAction.getType());
+        firstInput.accept(gameEngine.getStart(firstId));
+        firstInput.accept(gameEngine.getCurrent(firstId));
+        firstInput.accept(gameEngine.getStart(secondId));
+        firstInput.accept(gameEngine.getStart(secondId));
 
-        if (spotHistory.contains(playerCurrentSpot) || !spotBelongsToGrid(playerCurrentSpot)) {
-            return Winner.OPPONENT;
+        first.updateRepository();
+        Action firstAction = first.play()[0];
+
+        gameEngine.perform(firstId, firstAction);
+
+        if (gameEngine.isDead(firstId)) {
+            return playerFirst ? Winner.OPPONENT : Winner.PLAYER;
         }
-
-        playerScore++;
-        spotHistory.add(playerCurrentSpot);
-
-        return Winner.ON_GOING;
-    }
-
-    private Winner opponentRound(AI opponent) {
-        toOpponentInput(2, playerFirst ? 0 : 1);
 
         if (playerFirst) {
-            toOpponentInput(playerStartSpot);
-            toOpponentInput(playerCurrentSpot);
-
-            toOpponentInput(opponentStartSpot);
-            toOpponentInput(opponentCurrentSpot);
+            playerScore++;
         } else {
-            toOpponentInput(opponentStartSpot);
-            toOpponentInput(opponentCurrentSpot);
-
-            toOpponentInput(playerStartSpot);
-            toOpponentInput(playerCurrentSpot);
+            opponentScore++;
         }
 
-        opponent.updateRepository();
+        metadataSecondInput.accept(2);
+        metadataSecondInput.accept(1);
 
-        Action opponentAction = opponent.play()[0];
-        opponentCurrentSpot = opponentCurrentSpot.next(opponentAction.getType());
+        secondInput.accept(gameEngine.getStart(firstId));
+        secondInput.accept(gameEngine.getCurrent(firstId));
+        secondInput.accept(gameEngine.getStart(secondId));
+        secondInput.accept(gameEngine.getStart(secondId));
 
-        if (spotHistory.contains(opponentCurrentSpot) || !spotBelongsToGrid(opponentCurrentSpot)) {
-            return Winner.PLAYER;
+        second.updateRepository();
+        Action secondAction = second.play()[0];
+
+        gameEngine.perform(secondId, secondAction);
+
+        if (gameEngine.isDead(secondId)) {
+            return playerFirst ? Winner.PLAYER : Winner.OPPONENT;
         }
 
-        opponentScore++;
-        spotHistory.add(opponentCurrentSpot);
+        if (playerFirst) {
+            opponentScore++;
+        } else {
+            playerScore++;
+        }
 
         return Winner.ON_GOING;
     }
@@ -162,7 +140,27 @@ public class PvPGE extends ConfigurableGE {
         }
     }
 
-    private static boolean spotBelongsToGrid(Spot spot) {
-        return !(spot.getX() < 0 || spot.getX() >= GRID_X) && !(spot.getY() < 0 || spot.getY() >= GRID_Y);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        PvPGE pvPGE = (PvPGE) o;
+        return playerFirst == pvPGE.playerFirst &&
+                Arrays.equals(startSpots, pvPGE.startSpots);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), startSpots, playerFirst);
     }
 }

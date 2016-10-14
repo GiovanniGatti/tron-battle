@@ -16,9 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import player.Player.Action;
-import player.Player.KnowledgeRepo;
 import player.Player.Spot;
-import player.Player.SnailAI;
 
 @DisplayName("The snail AI")
 public class SnailAITest implements WithAssertions {

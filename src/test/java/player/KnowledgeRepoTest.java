@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import player.Player.ActionsType;
-import player.Player.KnowledgeRepo;
 import player.Player.Spot;
 
 @DisplayName("A knowledge repository")

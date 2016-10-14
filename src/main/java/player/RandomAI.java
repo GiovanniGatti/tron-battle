@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Random;
 
 import player.Player.AI;
-import player.Player.KnowledgeRepo;
 
 /**
  * Dumbest AI possible: it does random movements considering all available possibilities

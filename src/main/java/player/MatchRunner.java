@@ -1,5 +1,8 @@
 package player;
 
+import player.Player.InputRepository;
+import player.Player.Spot;
+import player.Player.TronLightCycle;
 import player.engine.PvPGE;
 import player.match.Match;
 import player.match.Match.MatchResult;
@@ -12,9 +15,9 @@ public final class MatchRunner {
 
     public static void main(String args[]) {
         Match match = new Match(
-                opponentInput -> () -> new RandomAI(new Player.KnowledgeRepo(opponentInput)),
-                playerInput -> () -> new Player.SnailAI(new Player.KnowledgeRepo(playerInput)),
-                () -> new PvPGE());
+                playerInput -> () -> new SnailAI(new KnowledgeRepo(playerInput)),
+                opponentInput -> () -> new Player.LongestSequenceAI(new InputRepository(opponentInput)),
+                () -> new PvPGE(false, new TronLightCycle(0, new Spot(0, 0)), new TronLightCycle(1, new Spot(15, 10))));
 
         MatchResult call = match.call();
 

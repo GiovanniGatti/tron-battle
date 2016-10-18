@@ -49,6 +49,7 @@ public final class Player {
             this.visitedSpots = new boolean[MAX_Y][MAX_X];
             for (TronLightCycle lightCycle : lightCycles) {
                 this.lightCycles[lightCycle.getPlayerN()] = new TronLightCycle(lightCycle);
+                //FIXME Optimize it
                 for (Spot visitedSpot : lightCycle.getVisitedSpots()) {
                     this.visitedSpots[visitedSpot.getY()][visitedSpot.getX()] = true;
                 }
@@ -117,7 +118,7 @@ public final class Player {
     static class LongestSequenceAI extends GeneticAI {
 
         public LongestSequenceAI(InputRepository repository) {
-            super(16, 64, 128, .7, .001, repository, LongestSequenceAI::evaluate);
+            super(64, 128, 64, .7, .1, repository, LongestSequenceAI::evaluate);
         }
 
         private static double evaluate(TronGameEngine engine, int playerN, ActionsType[] actions) {
@@ -145,6 +146,7 @@ public final class Player {
     public static class GeneticAI extends AI {
 
         private static final ActionsType[] POSSIBLE_ACTIONS = ActionsType.values();
+        private static final int TOURNAMENT_SIZE = 5;
 
         private final Random random;
         private final InputRepository repo;
@@ -197,74 +199,110 @@ public final class Player {
 
                 ActionsType[] genes = generateRandomMovements(movements);
                 // FIXME: for now, we are only able to simulate player's movements
-                Chromosome chromosome =
-                        new Chromosome(crossoverRate, mutationRate, genes, evaluationFunction, repo.getP(), random);
+                Chromosome chromosome = new Chromosome(genes, evaluationFunction, repo.getP(), random);
 
                 chromosome.evaluate(new TronGameEngine(repo.getInGameLightCycles()));
 
                 pool.add(chromosome);
             }
 
+            System.err.println("===");
             // Loop until solution is found
             for (int generation = 0; generation < generations; generation++) {
                 // Clear the new pool
                 newPool.clear();
 
+                // FIXME elitism implementation
+
                 // Loop until the pool has been processed
                 for (int x = pool.size() - 1; x >= 0; x -= 2) {
                     // Select two members
-                    Chromosome n1 = selectMember(pool);
-                    Chromosome n2 = selectMember(pool);
+                    // Chromosome[] parents = selectParents(pool);
+
+                    Chromosome[] parents = new Chromosome[2];
+                    parents[0] = tournamentSelection(pool);
+                    parents[1] = tournamentSelection(pool);
 
                     // Cross over and mutate
-                    n1.crossOver(n2);
-                    n1.mutate();
-                    n2.mutate();
+                    Chromosome[] children;
+                    if (random.nextFloat() <= crossoverRate) {
+                        children = parents[0].crossOver(parents[1]);
+                    } else {
+                        children = parents;
+                    }
+
+                    if (random.nextFloat() <= mutationRate) {
+                        children[0] = children[0].mutate();
+                    }
+
+                    if (random.nextFloat() <= mutationRate) {
+                        children[1] = children[1].mutate();
+                    }
 
                     // evaluate new nodes
-                    n1.evaluate(new TronGameEngine(repo.getInGameLightCycles()));
-                    n2.evaluate(new TronGameEngine(repo.getInGameLightCycles()));
+                    children[0].evaluate(new TronGameEngine(repo.getInGameLightCycles()));
+                    children[1].evaluate(new TronGameEngine(repo.getInGameLightCycles()));
 
                     // Add to the new pool
-                    newPool.add(n1);
-                    newPool.add(n2);
+                    newPool.add(children[0]);
+                    newPool.add(children[1]);
                 }
 
                 // Add the newPool back to the old pool
+                pool.clear();
                 pool.addAll(newPool);
+
+                double totalScore = newPool.stream()
+                        .mapToDouble(Chromosome::getScore)
+                        .sum();
+
+                System.err.println(generation + "," + totalScore);
             }
 
             Chromosome best = newPool.stream()
                     .max(Comparator.comparingDouble(Chromosome::getScore))
-                    .orElseThrow(() -> new IllegalStateException("Pool should contain at least one cromossome"));
+                    .orElseThrow(() -> new IllegalStateException("Pool should contain at least one chromosome"));
 
             System.err.println(best.getScore());
-
+            System.err.println("===");
             return best;
         }
 
-        private Chromosome selectMember(List<Chromosome> l) {
+        // FIXME: generic selection function
+        Chromosome rouletteSelect(List<Chromosome> population) {
+            // calculate the total weight
+            double weight_sum = population.stream()
+                    .mapToDouble(Chromosome::getScore)
+                    .sum();
 
-            // Get the total fitness
-            double tot = 0.0;
-            for (int x = l.size() - 1; x >= 0; x--) {
-                double score = (l.get(x)).score;
-                tot += score;
-            }
-            double slice = tot * random.nextDouble();
+            // get a random value
+            double value = random.nextDouble() * weight_sum;
 
-            // Loop to find the node
-            double ttot = 0.0;
-            for (int x = l.size() - 1; x >= 0; x--) {
-                Chromosome node = l.get(x);
-                ttot += node.score;
-                if (ttot >= slice) {
-                    l.remove(x);
-                    return node;
+            // locate the random value based on the weights
+            for (int i = 0; i < population.size(); i++) {
+                Chromosome individual = population.get(i);
+                value -= individual.getScore();
+                if (value <= 0) {
+                    // FIXME: strongest have preference
+                    return individual;
                 }
             }
 
-            return l.remove(l.size() - 1);
+            // when rounding errors occur, we return the last item's index
+            return population.get(population.size() - 1);
+        }
+
+        private Chromosome tournamentSelection(List<Chromosome> population) {
+
+            Chromosome best = population.get(random.nextInt(population.size()));
+            for (int j = 1; j < TOURNAMENT_SIZE; j++) {
+                Chromosome candidate = population.get(random.nextInt(population.size()));
+                if (candidate.getScore() > best.getScore()) {
+                    best = candidate;
+                }
+            }
+
+            return best;
         }
 
         private ActionsType[] generateRandomMovements(int movements) {
@@ -290,29 +328,22 @@ public final class Player {
         }
     }
 
-    private static class Chromosome {
+    private static class Chromosome implements Comparable<Chromosome> {
 
         private static final ActionsType[] POSSIBLE_ACTIONS = ActionsType.values();
 
-        private final double crossoverRate;
-        private final double mutationRate;
         private final EvaluationFunction evaluationFunction;
         private final int playerN;
         private final Random random;
-
-        private ActionsType[] genes;
+        private final ActionsType[] genes;
         private double score;
 
         public Chromosome(
-                double crossoverRate,
-                double mutationRate,
                 ActionsType[] genes,
                 EvaluationFunction evaluationFunction,
                 int playerN,
                 Random random) {
 
-            this.crossoverRate = crossoverRate;
-            this.mutationRate = mutationRate;
             this.genes = genes;
             this.evaluationFunction = evaluationFunction;
             this.playerN = playerN;
@@ -324,38 +355,48 @@ public final class Player {
             this.score = evaluationFunction.evaluate(gameEngine, playerN, genes);
         }
 
-        public void crossOver(Chromosome another) {
-            if (random.nextDouble() < crossoverRate) {
-                int randomGene = random.nextInt(genes.length);
+        public Chromosome[] crossOver(Chromosome another) {
 
-                ActionsType[] child1 = new ActionsType[genes.length];
-                ActionsType[] child2 = new ActionsType[genes.length];
+            int pivot = random.nextInt(another.genes.length);
 
-                for (int j = 0; j < randomGene; j++) {
-                    child1[j] = genes[j];
-                    child2[j] = another.genes[j];
-                }
+            ActionsType[] child1 = new ActionsType[another.genes.length];
+            ActionsType[] child2 = new ActionsType[genes.length];
 
-                for (int j = randomGene; j < genes.length; j++) {
-                    child1[j] = another.genes[j];
-                    child2[j] = genes[j];
-                }
+            System.arraycopy(genes, 0, child1, 0, pivot);
+            System.arraycopy(another.genes, pivot, child1, pivot, (another.genes.length - pivot));
 
-                this.genes = child1;
-                another.genes = child2;
-            }
+            System.arraycopy(another.genes, 0, child2, 0, pivot);
+            System.arraycopy(genes, pivot, child2, pivot, (genes.length - pivot));
+
+            return new Chromosome[] {
+                    new Chromosome(child1, evaluationFunction, playerN, random),
+                    new Chromosome(child2, evaluationFunction, playerN, random) };
         }
 
-        public void mutate() {
-            for (int i = 0; i < genes.length; i++) {
-                if (random.nextDouble() <= mutationRate) {
-                    genes[i] = POSSIBLE_ACTIONS[random.nextInt(POSSIBLE_ACTIONS.length)];
-                }
-            }
+        public Chromosome mutate() {
+            ActionsType[] mutate = new ActionsType[genes.length];
+            int pivot = random.nextInt(genes.length);
+
+            System.arraycopy(genes, 0, mutate, 0, pivot);
+            System.arraycopy(genes, pivot + 1, mutate, pivot + 1, (genes.length - pivot - 1));
+            mutate[pivot] = POSSIBLE_ACTIONS[random.nextInt(POSSIBLE_ACTIONS.length)];
+
+            return new Chromosome(mutate, evaluationFunction, playerN, random);
         }
 
         public double getScore() {
             return score;
+        }
+
+        @Override
+        public int compareTo(Chromosome c) {
+            if (score < c.score) {
+                return -1;
+            } else if (score > c.score) {
+                return 1;
+            }
+
+            return 0;
         }
 
         @Override

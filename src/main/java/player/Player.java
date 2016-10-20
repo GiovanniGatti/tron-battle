@@ -49,7 +49,6 @@ public final class Player {
             this.visitedSpots = new boolean[MAX_Y][MAX_X];
             for (TronLightCycle lightCycle : lightCycles) {
                 this.lightCycles[lightCycle.getPlayerN()] = new TronLightCycle(lightCycle);
-                //FIXME Optimize it
                 for (Spot visitedSpot : lightCycle.getVisitedSpots()) {
                     this.visitedSpots[visitedSpot.getY()][visitedSpot.getX()] = true;
                 }
@@ -118,7 +117,7 @@ public final class Player {
     static class LongestSequenceAI extends GeneticAI {
 
         public LongestSequenceAI(InputRepository repository) {
-            super(64, 128, 64, .7, .1, repository, LongestSequenceAI::evaluate);
+            super(64, 128, 32, .7, .1, repository, LongestSequenceAI::evaluate);
         }
 
         private static double evaluate(TronGameEngine engine, int playerN, ActionsType[] actions) {
@@ -146,8 +145,9 @@ public final class Player {
     public static class GeneticAI extends AI {
 
         private static final ActionsType[] POSSIBLE_ACTIONS = ActionsType.values();
-        private static final int TOURNAMENT_SIZE = 5;
+        private static final int TOURNAMENT_SIZE = 2;
 
+        private final boolean eletism;
         private final Random random;
         private final InputRepository repo;
         private final int geneLength;
@@ -158,6 +158,7 @@ public final class Player {
         private final EvaluationFunction evaluationFunction;
 
         public GeneticAI(
+                boolean eletism,
                 int geneLength,
                 int popSize,
                 int generations,
@@ -167,6 +168,7 @@ public final class Player {
                 EvaluationFunction evaluationFunction) {
 
             super(repo);
+            this.eletism = eletism;
             this.geneLength = geneLength;
             this.popSize = popSize;
             this.generations = generations;
@@ -175,6 +177,18 @@ public final class Player {
             this.evaluationFunction = evaluationFunction;
             this.random = new Random();
             this.repo = repo;
+        }
+
+        public GeneticAI(
+                int geneLength,
+                int popSize,
+                int generations,
+                double crossoverRate,
+                double mutationRate,
+                InputRepository repo,
+                EvaluationFunction evaluationFunction) {
+
+            this(true, geneLength, popSize, generations, crossoverRate, mutationRate, repo, evaluationFunction);
         }
 
         @Override
@@ -212,7 +226,21 @@ public final class Player {
                 // Clear the new pool
                 newPool.clear();
 
-                // FIXME elitism implementation
+                if (eletism) {
+                    // FIXME: listIterator instead?
+                    int bestIndex = 0;
+                    Chromosome best = pool.get(0);
+                    for (int i = 1; i < pool.size(); i++) {
+                        Chromosome chromosome = pool.get(i);
+                        if (chromosome.getScore() > best.getScore()) {
+                            bestIndex = i;
+                            best = chromosome;
+                        }
+                    }
+
+                    pool.remove(bestIndex);
+                    newPool.add(best);
+                }
 
                 // Loop until the pool has been processed
                 for (int x = pool.size() - 1; x >= 0; x -= 2) {

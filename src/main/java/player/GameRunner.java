@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import player.Player.LongestSequenceAI;
 import player.Player.Spot;
 import player.Player.TronLightCycle;
 import player.engine.PvPGE;
@@ -22,7 +23,7 @@ public final class GameRunner {
 
         Game game = new Game(
                 playerInput -> () -> new SnailAI(new KnowledgeRepo(playerInput)),
-                opponentInput -> () -> new Player.LongestSequenceAI(new Player.InputRepository(opponentInput)),
+                opponentInput -> () -> new LongestSequenceAI(new Player.InputRepository(opponentInput)),
                 () -> new PvPGE(false, new TronLightCycle(0, new Spot(15, 10)), new TronLightCycle(1, new Spot(0, 0))),
                 pool);
 

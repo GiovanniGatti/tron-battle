@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import player.Player;
 import player.Player.AI;
 import player.Player.Action;
 import player.Player.Spot;
@@ -75,7 +74,7 @@ public class PvPGE extends ConfigurableGE {
         firstInput.accept(gameEngine.getStart(firstId));
         firstInput.accept(gameEngine.getCurrent(firstId));
         firstInput.accept(gameEngine.getStart(secondId));
-        firstInput.accept(gameEngine.getStart(secondId));
+        firstInput.accept(gameEngine.getCurrent(secondId));
 
         first.updateRepository();
         Action firstAction = first.play()[0];
@@ -98,7 +97,7 @@ public class PvPGE extends ConfigurableGE {
         secondInput.accept(gameEngine.getStart(firstId));
         secondInput.accept(gameEngine.getCurrent(firstId));
         secondInput.accept(gameEngine.getStart(secondId));
-        secondInput.accept(gameEngine.getStart(secondId));
+        secondInput.accept(gameEngine.getCurrent(secondId));
 
         second.updateRepository();
         Action secondAction = second.play()[0];
@@ -163,4 +162,9 @@ public class PvPGE extends ConfigurableGE {
     public int hashCode() {
         return Objects.hash(super.hashCode(), startSpots, playerFirst);
     }
+    //
+    // @Override
+    // public String toString() {
+    // return gameEngine.toString();
+    // }
 }

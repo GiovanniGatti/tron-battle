@@ -112,6 +112,29 @@ public final class Player {
         public Spot getStart(int playerN) {
             return lightCycles[playerN].getStart();
         }
+
+//        @Override
+//        public String toString() {
+//            StringBuilder str = new StringBuilder();
+//            for (int i = 0; i < MAX_Y; i++) {
+//                for (int j = 0; j < MAX_X; j++) {
+//                    boolean found = false;
+//                    for (TronLightCycle lightCycle : lightCycles) {
+//                        if (lightCycle.getVisitedSpots().contains(new Spot(j, i))) {
+//                            str.append(lightCycle.getPlayerN());
+//                            found = true;
+//                            break;
+//                        }
+//                    }
+//                    if (!found) {
+//                        str.append('.');
+//                    }
+//                }
+//                str.append('\n');
+//            }
+//
+//            return str.toString();
+//        }
     }
 
     static class LongestSequenceAI extends GeneticAI {
@@ -193,9 +216,9 @@ public final class Player {
 
         @Override
         public Action[] play() {
-            // long currentTimeMillis = System.currentTimeMillis();
+            long currentTimeMillis = System.currentTimeMillis();
             Chromosome chromosome = find(geneLength, popSize, generations);
-            // System.err.println(System.currentTimeMillis() - currentTimeMillis);
+            System.err.println(System.currentTimeMillis() - currentTimeMillis);
 
             ActionsType nextAction = chromosome.genes[0];
 
@@ -220,14 +243,13 @@ public final class Player {
                 pool.add(chromosome);
             }
 
-            System.err.println("===");
+            // System.err.println("===");
             // Loop until solution is found
             for (int generation = 0; generation < generations; generation++) {
                 // Clear the new pool
                 newPool.clear();
 
                 if (eletism) {
-                    // FIXME: listIterator instead?
                     int bestIndex = 0;
                     Chromosome best = pool.get(0);
                     for (int i = 1; i < pool.size(); i++) {
@@ -280,11 +302,11 @@ public final class Player {
                 pool.clear();
                 pool.addAll(newPool);
 
-                double totalScore = newPool.stream()
-                        .mapToDouble(Chromosome::getScore)
-                        .sum();
-
-                System.err.println(generation + "," + totalScore);
+                // double totalScore = newPool.stream()
+                // .mapToDouble(Chromosome::getScore)
+                // .sum();
+                //
+                // System.err.println(generation + "," + totalScore);
             }
 
             Chromosome best = newPool.stream()
@@ -292,7 +314,7 @@ public final class Player {
                     .orElseThrow(() -> new IllegalStateException("Pool should contain at least one chromosome"));
 
             System.err.println(best.getScore());
-            System.err.println("===");
+            // System.err.println("===");
             return best;
         }
 

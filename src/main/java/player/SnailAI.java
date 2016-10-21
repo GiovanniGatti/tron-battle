@@ -14,7 +14,7 @@ public class SnailAI extends Player.AI {
     private KnowledgeRepo repo;
 
     public SnailAI(KnowledgeRepo knowledgeRepo) {
-        super(knowledgeRepo::update);
+        super(knowledgeRepo);
         this.repo = knowledgeRepo;
     }
 

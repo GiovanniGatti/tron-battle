@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -113,28 +114,28 @@ public final class Player {
             return lightCycles[playerN].getStart();
         }
 
-//        @Override
-//        public String toString() {
-//            StringBuilder str = new StringBuilder();
-//            for (int i = 0; i < MAX_Y; i++) {
-//                for (int j = 0; j < MAX_X; j++) {
-//                    boolean found = false;
-//                    for (TronLightCycle lightCycle : lightCycles) {
-//                        if (lightCycle.getVisitedSpots().contains(new Spot(j, i))) {
-//                            str.append(lightCycle.getPlayerN());
-//                            found = true;
-//                            break;
-//                        }
-//                    }
-//                    if (!found) {
-//                        str.append('.');
-//                    }
-//                }
-//                str.append('\n');
-//            }
-//
-//            return str.toString();
-//        }
+        // @Override
+        // public String toString() {
+        // StringBuilder str = new StringBuilder();
+        // for (int i = 0; i < MAX_Y; i++) {
+        // for (int j = 0; j < MAX_X; j++) {
+        // boolean found = false;
+        // for (TronLightCycle lightCycle : lightCycles) {
+        // if (lightCycle.getVisitedSpots().contains(new Spot(j, i))) {
+        // str.append(lightCycle.getPlayerN());
+        // found = true;
+        // break;
+        // }
+        // }
+        // if (!found) {
+        // str.append('.');
+        // }
+        // }
+        // str.append('\n');
+        // }
+        //
+        // return str.toString();
+        // }
     }
 
     static class LongestSequenceAI extends GeneticAI {
@@ -464,6 +465,7 @@ public final class Player {
         private int P;
 
         private final List<TronLightCycle> inGameLightCycles;
+        private BattleField battleField;
 
         protected InputRepository(IntSupplier inputSupplier) {
             super(inputSupplier);
@@ -507,6 +509,7 @@ public final class Player {
 
             this.inGameLightCycles.clear();
             this.inGameLightCycles.addAll(inGameLightCycles);
+            this.battleField = new BattleField(inGameLightCycles);
         }
 
         public int getN() {
@@ -519,6 +522,10 @@ public final class Player {
 
         public List<TronLightCycle> getInGameLightCycles() {
             return Collections.unmodifiableList(inGameLightCycles);
+        }
+
+        public BattleField getBattleField() {
+            return battleField;
         }
 
         public TronLightCycle getPlayerLightCycle() {
@@ -535,6 +542,44 @@ public final class Player {
         }
     }
 
+    public static final class BattleField {
+
+        private static final int MAX_X = 30;
+        private static final int MAX_Y = 20;
+
+        private final boolean[][] grid;
+        private final TronLightCycle[] lightCycles;
+        private final Map<Spot, TronLightCycle> byStartSpot;
+
+        // TODO: design -> how to protect against playerN changes?
+
+        public BattleField(List<TronLightCycle> inGameLightCycles) {
+            this.lightCycles = new TronLightCycle[inGameLightCycles.size()];
+            this.grid = new boolean[MAX_Y][MAX_X];
+            this.byStartSpot = new HashMap<>();
+
+            for (TronLightCycle lightCycle : inGameLightCycles) {
+                this.lightCycles[lightCycle.getPlayerN()] = new TronLightCycle(lightCycle);
+                for (Spot visitedSpot : lightCycle.getVisitedSpots()) {
+                    this.grid[visitedSpot.getY()][visitedSpot.getX()] = true;
+                }
+            }
+        }
+
+        public Optional<TronLightCycle> getLightCycle(Spot startingSpot) {
+            return Optional.ofNullable(byStartSpot.get(startingSpot));// TODO: how to protect against immutability?
+        }
+
+        public TronLightCycle getLightCycle(int playerN) {
+            // TODO: check not null?
+            return lightCycles[playerN]; // TODO: how to protect against immutability?
+        }
+
+        public void moveTo(int playerN, Spot spot) {
+            // TODO:implement it
+        }
+    }
+
     public static final class TronLightCycle {
 
         private final int playerN;
@@ -546,7 +591,7 @@ public final class Player {
             this.playerN = playerN;
             this.current = current;
             this.start = current;
-            this.visitedSpots = new HashSet<>();
+            this.visitedSpots = new HashSet<>(256);
             this.visitedSpots.add(current);
         }
 

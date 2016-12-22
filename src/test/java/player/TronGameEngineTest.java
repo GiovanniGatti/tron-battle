@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import player.Player.Action;
 import player.Player.Spot;
-import player.Player.TronGameEngine;
+import player.Player.StrictEngine;
 import player.Player.TronLightCycle;
 
 @DisplayName("A tron game engine")

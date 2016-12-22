@@ -18,7 +18,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import player.Player.ActionsType;
 import player.Player.Spot;
-import player.Player.TronGameEngine;
+import player.Player.StrictEngine;
 import player.Player.TronLightCycle;
 
 public class TronGameEngineBenchmark {

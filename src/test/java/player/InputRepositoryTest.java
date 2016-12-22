@@ -1,9 +1,9 @@
 package player;
 
 import java.util.ArrayDeque;
-import java.util.List;
 import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 
 import org.assertj.core.api.WithAssertions;
 import org.assertj.core.util.Preconditions;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import player.Player.InputRepository;
 import player.Player.Spot;
-import player.Player.TronLightCycle;
 
 @DisplayName("An input repository")
 class InputRepositoryTest implements WithAssertions {
@@ -49,10 +48,8 @@ class InputRepositoryTest implements WithAssertions {
         InputRepository repo = new InputRepository(inputProvider::inputStream);
         repo.update();
 
-        TronLightCycle playerLightCycle = repo.getPlayerLightCycle();
-        assertThat(playerLightCycle.getPlayerN()).isEqualTo(2);
-        assertThat(playerLightCycle.getCurrent()).isEqualTo(playerStartingSpot);
-        assertThat(playerLightCycle.getVisitedSpots()).containsOnly(playerStartingSpot);
+        Spot playerLightCycle = repo.getPlayerLightCycleStartSpot();
+        assertThat(playerLightCycle).isEqualTo(playerStartingSpot);
     }
 
     @Test
@@ -66,14 +63,9 @@ class InputRepositoryTest implements WithAssertions {
         InputRepository repo = new InputRepository(inputProvider::inputStream);
         repo.update();
 
-        List<TronLightCycle> opponentLightCycles = repo.getOpponentLightCycles();
+        Set<Spot> opponentLightCycles = repo.getOpponentLightCyclesStartSpot();
 
         assertThat(opponentLightCycles)
-                .extracting(TronLightCycle::getPlayerN)
-                .contains(0, 1);
-
-        assertThat(opponentLightCycles)
-                .extracting(TronLightCycle::getStart)
                 .contains(opponent1LightCycle, opponent2LightCycle);
     }
 

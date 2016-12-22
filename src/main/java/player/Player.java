@@ -2,7 +2,6 @@ package player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -10,12 +9,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.function.IntSupplier;
-import java.util.stream.Collectors;
 
 public final class Player {
 
@@ -34,108 +31,58 @@ public final class Player {
         }
     }
 
-    public static final class TronGameEngine {
+    /**
+     * Simulates the game on a relaxed mode, that is, players are never taken out of the grid when they die.
+     */
+    public static final class TronSimulator {
 
         private static final int MAX_X = 30;
         private static final int MAX_Y = 20;
 
-        private final boolean[] dead;
+        private final BattleFieldSnapshot snapshot;
 
-        private final boolean[][] visitedSpots;
-        private final TronLightCycle[] lightCycles;
+        // mutable internal state
+        private final boolean[][] grid;
+        private final Map<Spot, Spot> currentSpots;
 
-        public TronGameEngine(Collection<TronLightCycle> lightCycles) {
+        public TronSimulator(BattleFieldSnapshot snapshot) {
 
-            this.lightCycles = new TronLightCycle[lightCycles.size()];
-            this.visitedSpots = new boolean[MAX_Y][MAX_X];
-            for (TronLightCycle lightCycle : lightCycles) {
-                this.lightCycles[lightCycle.getPlayerN()] = new TronLightCycle(lightCycle);
-                for (Spot visitedSpot : lightCycle.getVisitedSpots()) {
-                    this.visitedSpots[visitedSpot.getY()][visitedSpot.getX()] = true;
-                }
+            this.snapshot = snapshot;
+
+            this.grid = new boolean[MAX_Y][MAX_X];
+
+            Set<Spot> startSpots = snapshot.getStartSpots();
+            this.currentSpots = new HashMap<>(startSpots.size());
+            for (Spot spot : startSpots) {
+                currentSpots.put(spot, snapshot.getCurrentSpot(spot));
+            }
+        }
+
+        /**
+         * Simutales the action for a specific player
+         *
+         * @param startAt the players start position
+         * @param action where to go
+         * @return true if action has been successful, false if action kills the player.
+         */
+        public boolean perform(Spot startAt, ActionsType action) {
+            Spot currentSpot = currentSpots.get(startAt);
+
+            if (currentSpot == null) {
+                throw new IllegalStateException("Unknown player starting at " + startAt);
             }
 
-            this.dead = new boolean[lightCycles.size()];
-        }
+            Spot next = currentSpot.next(action);
 
-        public TronGameEngine(TronLightCycle... lightCycles) {
-            this(Arrays.asList(lightCycles));
-        }
-
-        public void perform(int playerN, Action action) {
-            perform(true, playerN, action);
-        }
-
-        public void perform(boolean strict, int playerN, Action action) {
-            perform(strict, playerN, action.getType());
-        }
-
-        public void perform(boolean strict, int playerN, ActionsType action) {
-
-            if (strict && dead[playerN]) {
-                return;
+            if (grid[next.getY()][next.getX()] || snapshot.hasBeenVisited(next)) {
+                return false;
             }
 
-            TronLightCycle lightCycle = lightCycles[playerN];
+            currentSpots.put(startAt, next);
+            grid[next.getY()][next.getX()] = true;
 
-            Spot current = lightCycle.getCurrent();
-            Spot next = current.next(action);
-
-            if (next.getX() >= 0 && next.getX() < MAX_X && next.getY() >= 0 && next.getY() < MAX_Y) {
-                if (!visitedSpots[next.getY()][next.getX()]) {
-                    // valid movement, then perform it
-                    lightCycle.moveTo(next);
-                    visitedSpots[next.getY()][next.getX()] = true;
-                    return;
-                }
-            }
-
-            // invalid movement
-
-            if (strict) {
-                // if on strict mode, player is taken off the grid
-                for (Spot spot : lightCycle.getVisitedSpots()) {
-                    visitedSpots[spot.getY()][spot.getX()] = false;
-                }
-            }
-
-            dead[playerN] = true;
+            return true;
         }
-
-        public boolean isDead(int playerN) {
-            return dead[playerN];
-        }
-
-        public Spot getCurrent(int playerN) {
-            return lightCycles[playerN].getCurrent();
-        }
-
-        public Spot getStart(int playerN) {
-            return lightCycles[playerN].getStart();
-        }
-
-        // @Override
-        // public String toString() {
-        // StringBuilder str = new StringBuilder();
-        // for (int i = 0; i < MAX_Y; i++) {
-        // for (int j = 0; j < MAX_X; j++) {
-        // boolean found = false;
-        // for (TronLightCycle lightCycle : lightCycles) {
-        // if (lightCycle.getVisitedSpots().contains(new Spot(j, i))) {
-        // str.append(lightCycle.getPlayerN());
-        // found = true;
-        // break;
-        // }
-        // }
-        // if (!found) {
-        // str.append('.');
-        // }
-        // }
-        // str.append('\n');
-        // }
-        //
-        // return str.toString();
-        // }
     }
 
     static class LongestSequenceAI extends GeneticAI {
@@ -464,12 +411,14 @@ public final class Player {
         private int N;
         private int P;
 
-        private final List<TronLightCycle> inGameLightCycles;
-        private BattleField battleField;
+        private final BattleField battleField;
+        private final Set<Spot> opponenetsStartSpots;
+        private Spot playerStartSpot;
 
         protected InputRepository(IntSupplier inputSupplier) {
             super(inputSupplier);
-            this.inGameLightCycles = new ArrayList<>(4);
+            this.battleField = new BattleField();
+            opponenetsStartSpots = new HashSet<>();
         }
 
         @Override
@@ -477,7 +426,7 @@ public final class Player {
             N = readInput(); // total number of players (2 to 4).
             P = readInput(); // your player number (0 to 3).
 
-            List<TronLightCycle> inGameLightCycles = new ArrayList<>(N);
+            Set<Spot> lightCyclesAlive = new HashSet<>(N);
 
             for (int i = 0; i < N; i++) {
 
@@ -492,24 +441,26 @@ public final class Player {
                 Spot startSpot = new Spot(X0, Y0);
                 Spot currentSpot = new Spot(X1, Y1);
 
-                Optional<TronLightCycle> maybeLightCycle =
-                        this.inGameLightCycles.stream()
-                                .filter(lightCycle -> lightCycle.getStart().equals(startSpot))
-                                .findFirst();
+                if (battleField.hasLightCycleStartingAt(startSpot)) {
+                    battleField.moveTo(startSpot, currentSpot);
+                } else {
 
-                if (maybeLightCycle.isPresent()) {
-                    TronLightCycle lightCycle = maybeLightCycle.get();
-                    lightCycle.moveTo(currentSpot);
-                    inGameLightCycles.add(lightCycle);
-                    continue;
+                    if (i != P) {
+                        opponenetsStartSpots.add(startSpot);
+                    } else {
+                        playerStartSpot = startSpot;
+                    }
+
+                    battleField.addLightCycleAt(startSpot, currentSpot);
                 }
 
-                inGameLightCycles.add(new TronLightCycle(i, startSpot));
+                lightCyclesAlive.add(startSpot);
             }
 
-            this.inGameLightCycles.clear();
-            this.inGameLightCycles.addAll(inGameLightCycles);
-            this.battleField = new BattleField(inGameLightCycles);
+            List<Spot> killedLightCycles = new ArrayList<>(battleField.getLightCyclesStartingSpots());
+            killedLightCycles.removeAll(lightCyclesAlive);
+
+            battleField.killLightCycles(lightCyclesAlive);
         }
 
         public int getN() {
@@ -520,25 +471,16 @@ public final class Player {
             return P;
         }
 
-        public List<TronLightCycle> getInGameLightCycles() {
-            return Collections.unmodifiableList(inGameLightCycles);
-        }
-
         public BattleField getBattleField() {
             return battleField;
         }
 
-        public TronLightCycle getPlayerLightCycle() {
-            return inGameLightCycles.stream()
-                    .filter(lightCycle -> lightCycle.getPlayerN() == getP())
-                    .findAny()
-                    .orElseThrow(() -> new IllegalStateException("Unable to find player <" + getP() + ">"));
+        public Spot getPlayerLightCycleStartSpot() {
+            return playerStartSpot;
         }
 
-        public List<TronLightCycle> getOpponentLightCycles() {
-            return inGameLightCycles.stream()
-                    .filter(lightCycle -> lightCycle.getPlayerN() != getP())
-                    .collect(Collectors.toList());
+        public Set<Spot> getOpponentLightCyclesStartSpot() {
+            return Collections.unmodifiableSet(opponenetsStartSpots);
         }
     }
 
@@ -548,79 +490,109 @@ public final class Player {
         private static final int MAX_Y = 20;
 
         private final boolean[][] grid;
-        private final TronLightCycle[] lightCycles;
-        private final Map<Spot, TronLightCycle> byStartSpot;
+        private final Map<Spot, Spot> currentSpot;
+        private final Map<Spot, Set<Spot>> visitedSpots;
 
-        // TODO: design -> how to protect against playerN changes?
-
-        public BattleField(List<TronLightCycle> inGameLightCycles) {
-            this.lightCycles = new TronLightCycle[inGameLightCycles.size()];
+        public BattleField() {
+            this.currentSpot = new HashMap<>();
             this.grid = new boolean[MAX_Y][MAX_X];
-            this.byStartSpot = new HashMap<>();
+            this.visitedSpots = new HashMap<>();
+        }
 
-            for (TronLightCycle lightCycle : inGameLightCycles) {
-                this.lightCycles[lightCycle.getPlayerN()] = new TronLightCycle(lightCycle);
-                for (Spot visitedSpot : lightCycle.getVisitedSpots()) {
-                    this.grid[visitedSpot.getY()][visitedSpot.getX()] = true;
+        public Set<Spot> getLightCyclesStartingSpots() {
+            return currentSpot.keySet();
+        }
+
+        public boolean hasLightCycleStartingAt(Spot startSpot) {
+            return currentSpot.containsKey(startSpot);
+        }
+
+        public void addLightCycleAt(Spot startSpot, Spot currentSpot) {
+
+            if (!startSpot.equals(currentSpot) && !startSpot.isNeigborOf(currentSpot)) {
+                throw new IllegalStateException(
+                        "Cannot add non-neighbors spots start=" + startSpot +
+                                ", current=" + currentSpot);
+            }
+
+            this.currentSpot.put(startSpot, currentSpot);
+
+            Set<Spot> visitedSpots = new HashSet<>(256);
+            visitedSpots.add(startSpot);
+            visitedSpots.add(currentSpot);
+
+            this.visitedSpots.put(startSpot, visitedSpots);
+
+            grid[startSpot.getY()][startSpot.getX()] = true;
+            grid[currentSpot.getY()][currentSpot.getX()] = true;
+        }
+
+        public void moveTo(Spot startSpot, Spot currentSpot) {
+            Spot past = this.currentSpot.get(startSpot);
+
+            if (past == null || !past.isNeigborOf(currentSpot)) {
+                throw new IllegalStateException("Cannot move from " + past + " to " + currentSpot);
+            }
+
+            this.currentSpot.put(startSpot, currentSpot);
+            visitedSpots.get(startSpot).add(currentSpot);
+
+            grid[currentSpot.getY()][currentSpot.getX()] = true;
+        }
+
+        public void killLightCycles(Set<Spot> startSpots) {
+
+            for (Spot startSpot : startSpots) {
+                currentSpot.remove(startSpot);
+
+                Set<Spot> spots = visitedSpots.remove(startSpot);
+                for (Spot spot : spots) {
+                    grid[spot.getY()][spot.getX()] = false;
                 }
             }
         }
 
-        public Optional<TronLightCycle> getLightCycle(Spot startingSpot) {
-            return Optional.ofNullable(byStartSpot.get(startingSpot));// TODO: how to protect against immutability?
-        }
-
-        public TronLightCycle getLightCycle(int playerN) {
-            // TODO: check not null?
-            return lightCycles[playerN]; // TODO: how to protect against immutability?
-        }
-
-        public void moveTo(int playerN, Spot spot) {
-            // TODO:implement it
+        public BattleFieldSnapshot getSnapshot() {
+            throw new UnsupportedOperationException("TODO");
         }
     }
 
-    public static final class TronLightCycle {
+    public static final class BattleFieldSnapshot {
 
-        private final int playerN;
-        private Spot current;
-        private final Spot start;
-        private final Set<Spot> visitedSpots;
+        private final boolean[][] grid;
+        private final Map<Spot, Spot> currentSpots;
+        private final Map<Spot, Set<Spot>> visitedSpots;
 
-        public TronLightCycle(int playerN, Spot current) {
-            this.playerN = playerN;
-            this.current = current;
-            this.start = current;
-            this.visitedSpots = new HashSet<>(256);
-            this.visitedSpots.add(current);
+        public BattleFieldSnapshot(
+                boolean[][] grid,
+                Map<Spot, Spot> currentSpots,
+                Map<Spot, Set<Spot>> visitedSpots) {
+
+            // In order to optimize, we won't be copying the arena's state,
+            // and therefore after each round the snapshot is deprecated
+            this.grid = grid;
+            this.currentSpots = currentSpots;
+            this.visitedSpots = visitedSpots;
         }
 
-        public TronLightCycle(TronLightCycle another) {
-            this.playerN = another.playerN;
-            this.current = another.current;
-            this.start = another.start;
-            this.visitedSpots = new HashSet<>(another.visitedSpots);
+        public boolean playerOnGrid(Spot currentSpot) {
+            return currentSpots.containsKey(currentSpot) && visitedSpots.containsKey(currentSpot);
         }
 
-        public void moveTo(Spot spot) {
-            this.current = spot;
-            this.visitedSpots.add(spot);
+        public Set<Spot> getStartSpots() {
+            return currentSpots.keySet();
         }
 
-        public Spot getCurrent() {
-            return current;
+        public Spot getCurrentSpot(Spot startSpot) {
+            return currentSpots.get(startSpot);
         }
 
-        public Spot getStart() {
-            return start;
+        public boolean hasBeenVisited(Spot spot) {
+            return grid[spot.getY()][spot.getX()];
         }
 
-        public int getPlayerN() {
-            return playerN;
-        }
-
-        public Set<Spot> getVisitedSpots() {
-            return Collections.unmodifiableSet(visitedSpots);
+        public Set<Spot> getVisitedSpots(Spot startSpot) {
+            return Collections.unmodifiableSet(visitedSpots.get(startSpot));
         }
     }
 
@@ -652,6 +624,13 @@ public final class Player {
             Spot spot = (Spot) o;
             return x == spot.x &&
                     y == spot.y;
+        }
+
+        public boolean isNeigborOf(Spot spot) {
+            return (x + 1 == spot.x && y == spot.y) ||
+                    (x - 1 == spot.x && y == spot.y) ||
+                    (x == spot.x && y - 1 == spot.y) ||
+                    (x == spot.x && y + 1 == spot.y);
         }
 
         public double squareDistTo(Spot another) {
@@ -812,6 +791,6 @@ public final class Player {
     }
 
     public interface EvaluationFunction {
-        double evaluate(TronGameEngine engine, int playerN, ActionsType[] actions);
+        double evaluate(TronSimulator engine, int playerN, ActionsType[] actions);
     }
 }

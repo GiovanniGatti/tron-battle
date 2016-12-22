@@ -8,8 +8,8 @@ import java.util.function.Consumer;
 import player.Player.AI;
 import player.Player.Action;
 import player.Player.Spot;
-import player.Player.TronGameEngine;
 import player.Player.TronLightCycle;
+import player.TronGameEngine;
 
 public class PvPGE extends ConfigurableGE {
 

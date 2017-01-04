@@ -91,13 +91,12 @@ public final class Player {
             super(64, 128, 32, .7, .1, repository, LongestSequenceAI::evaluate);
         }
 
-        private static double evaluate(TronGameEngine engine, int playerN, ActionsType[] actions) {
+        private static double evaluate(TronSimulator engine, Spot startAt, ActionsType[] actions) {
             double score = 0;
 
             for (ActionsType action : actions) {
-                engine.perform(false, playerN, action);
 
-                if (engine.isDead(playerN)) {
+                if (engine.perform(startAt, action)) {
                     break;
                 }
 
@@ -127,6 +126,7 @@ public final class Player {
         private final double crossoverRate;
         private final double mutationRate;
         private final EvaluationFunction evaluationFunction;
+        private final BattleFieldSnapshot battleFieldSnapshot;
 
         public GeneticAI(
                 boolean eletism,
@@ -148,6 +148,7 @@ public final class Player {
             this.evaluationFunction = evaluationFunction;
             this.random = new Random();
             this.repo = repo;
+            battleFieldSnapshot = repo.getBattleField();
         }
 
         public GeneticAI(
@@ -184,9 +185,10 @@ public final class Player {
 
                 ActionsType[] genes = generateRandomMovements(movements);
                 // FIXME: for now, we are only able to simulate player's movements
-                Chromosome chromosome = new Chromosome(genes, evaluationFunction, repo.getP(), random);
+                Chromosome chromosome =
+                        new Chromosome(genes, evaluationFunction, repo.getPlayerLightCycleStartSpot(), random);
 
-                chromosome.evaluate(new TronGameEngine(repo.getInGameLightCycles()));
+                chromosome.evaluate(new TronSimulator(battleFieldSnapshot));
 
                 pool.add(chromosome);
             }
@@ -238,8 +240,8 @@ public final class Player {
                     }
 
                     // evaluate new nodes
-                    children[0].evaluate(new TronGameEngine(repo.getInGameLightCycles()));
-                    children[1].evaluate(new TronGameEngine(repo.getInGameLightCycles()));
+                    children[0].evaluate(new TronSimulator(battleFieldSnapshot));
+                    children[1].evaluate(new TronSimulator(battleFieldSnapshot));
 
                     // Add to the new pool
                     newPool.add(children[0]);
@@ -331,7 +333,7 @@ public final class Player {
         private static final ActionsType[] POSSIBLE_ACTIONS = ActionsType.values();
 
         private final EvaluationFunction evaluationFunction;
-        private final int playerN;
+        private final Spot startAt;
         private final Random random;
         private final ActionsType[] genes;
         private double score;
@@ -339,18 +341,18 @@ public final class Player {
         public Chromosome(
                 ActionsType[] genes,
                 EvaluationFunction evaluationFunction,
-                int playerN,
+                Spot startAt,
                 Random random) {
 
             this.genes = genes;
             this.evaluationFunction = evaluationFunction;
-            this.playerN = playerN;
+            this.startAt = startAt;
             this.random = random;
             this.score = 0.0;
         }
 
-        public void evaluate(TronGameEngine gameEngine) {
-            this.score = evaluationFunction.evaluate(gameEngine, playerN, genes);
+        public void evaluate(TronSimulator gameEngine) {
+            this.score = evaluationFunction.evaluate(gameEngine, startAt, genes);
         }
 
         public Chromosome[] crossOver(Chromosome another) {
@@ -367,8 +369,8 @@ public final class Player {
             System.arraycopy(genes, pivot, child2, pivot, (genes.length - pivot));
 
             return new Chromosome[] {
-                    new Chromosome(child1, evaluationFunction, playerN, random),
-                    new Chromosome(child2, evaluationFunction, playerN, random) };
+                    new Chromosome(child1, evaluationFunction, startAt, random),
+                    new Chromosome(child2, evaluationFunction, startAt, random) };
         }
 
         public Chromosome mutate() {
@@ -379,7 +381,7 @@ public final class Player {
             System.arraycopy(genes, pivot + 1, mutate, pivot + 1, (genes.length - pivot - 1));
             mutate[pivot] = POSSIBLE_ACTIONS[random.nextInt(POSSIBLE_ACTIONS.length)];
 
-            return new Chromosome(mutate, evaluationFunction, playerN, random);
+            return new Chromosome(mutate, evaluationFunction, startAt, random);
         }
 
         public double getScore() {
@@ -399,7 +401,7 @@ public final class Player {
 
         @Override
         public String toString() {
-            return "Chromosome{" + "playerN=" + playerN +
+            return "Chromosome{" + "startAt=" + startAt +
                     ", genes=" + Arrays.toString(genes) +
                     ", score=" + score +
                     '}';
@@ -471,8 +473,8 @@ public final class Player {
             return P;
         }
 
-        public BattleField getBattleField() {
-            return battleField;
+        public BattleFieldSnapshot getBattleField() {
+            return battleField.getSnapshot();
         }
 
         public Spot getPlayerLightCycleStartSpot() {
@@ -553,7 +555,7 @@ public final class Player {
         }
 
         public BattleFieldSnapshot getSnapshot() {
-            throw new UnsupportedOperationException("TODO");
+            return new BattleFieldSnapshot(grid, currentSpot, visitedSpots);
         }
     }
 
@@ -791,6 +793,6 @@ public final class Player {
     }
 
     public interface EvaluationFunction {
-        double evaluate(TronSimulator engine, int playerN, ActionsType[] actions);
+        double evaluate(TronSimulator engine, Spot startAt, ActionsType[] actions);
     }
 }

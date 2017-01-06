@@ -542,6 +542,18 @@ public final class Player {
             grid[currentSpot.getY()][currentSpot.getX()] = true;
         }
 
+        public Spot getCurrentSpot(Spot startSpot) {
+            return currentSpot.get(startSpot);
+        }
+
+        public boolean hasBeenVisited(Spot spot) {
+            return grid[spot.getY()][spot.getX()];
+        }
+
+        public Set<Spot> getStartSpots() {
+            return currentSpot.keySet();
+        }
+
         public void killLightCycles(Set<Spot> startSpots) {
 
             for (Spot startSpot : startSpots) {
@@ -556,6 +568,27 @@ public final class Player {
 
         public BattleFieldSnapshot getSnapshot() {
             return new BattleFieldSnapshot(grid, currentSpot, visitedSpots);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            BattleField that = (BattleField) o;
+            return Arrays.equals(grid, that.grid) &&
+                    Objects.equals(currentSpot, that.currentSpot) &&
+                    Objects.equals(visitedSpots, that.visitedSpots);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(grid, currentSpot, visitedSpots);
         }
     }
 

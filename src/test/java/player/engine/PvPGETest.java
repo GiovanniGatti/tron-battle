@@ -24,7 +24,6 @@ import player.Player.AI;
 import player.Player.Action;
 import player.Player.ActionsType;
 import player.Player.Spot;
-import player.Player.TronLightCycle;
 
 @DisplayName("A PvP Game Engine")
 class PvPGETest implements WithAssertions {
@@ -33,11 +32,7 @@ class PvPGETest implements WithAssertions {
     @DisplayName("finishes before opponent move if player kills himself when player plays first")
     void playerGoesFirst() {
 
-        PvPGE ge =
-                new PvPGE(
-                        true,
-                        new TronLightCycle(0, new Spot(29, 10)),
-                        new TronLightCycle(1, new Spot(0, 10)));
+        PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(29, 10), new Spot(0, 10));
         ge.start();
 
         AI player = MockedAI.anyWithActions(new Action(RIGHT));
@@ -52,11 +47,7 @@ class PvPGETest implements WithAssertions {
     @DisplayName("finishes before player move if opponent kills himself when opponent plays first")
     void opponentGoesFirst() {
 
-        PvPGE ge =
-                new PvPGE(
-                        false,
-                        new TronLightCycle(0, new Spot(29, 10)),
-                        new TronLightCycle(1, new Spot(0, 10)));
+        PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(29, 10), new Spot(0, 10));
         ge.start();
 
         AI player = MockedAI.anyWithActions(new Action(RIGHT));
@@ -71,11 +62,7 @@ class PvPGETest implements WithAssertions {
     @DisplayName("maps correctly input when player starts")
     void mapsInputWhenPlayerStarts() {
 
-        PvPGE ge =
-                new PvPGE(
-                        true,
-                        new TronLightCycle(0, new Spot(15, 10)),
-                        new TronLightCycle(1, new Spot(0, 10)));
+        PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(0, 10));
         ge.start();
 
         AI player = MockedAI.anyWithActions(new Action(RIGHT));
@@ -114,11 +101,7 @@ class PvPGETest implements WithAssertions {
     @DisplayName("maps correctly input when opponent starts")
     void mapsInputWhenOpponentStarts() {
 
-        PvPGE ge =
-                new PvPGE(
-                        false,
-                        new TronLightCycle(0, new Spot(15, 10)),
-                        new TronLightCycle(1, new Spot(0, 10)));
+        PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(0, 10));
         ge.start();
 
         AI player = MockedAI.anyWithActions(new Action(RIGHT));
@@ -165,11 +148,7 @@ class PvPGETest implements WithAssertions {
             @DisplayName("if player goes outside the grid")
             void whenPlayerGoesOusideTheGrid() {
 
-                PvPGE ge =
-                        new PvPGE(
-                                true,
-                                new TronLightCycle(0, new Spot(29, 10)),
-                                new TronLightCycle(1, new Spot(15, 10)));
+                PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(29, 10), new Spot(15, 10));
                 ge.start();
 
                 AI player = MockedAI.anyWithActions(new Action(RIGHT));
@@ -184,11 +163,7 @@ class PvPGETest implements WithAssertions {
             @DisplayName("if player collides against himself")
             void whenPlayerCollidesAgainstHimself() {
 
-                PvPGE ge =
-                        new PvPGE(
-                                true,
-                                new TronLightCycle(0, new Spot(15, 10)),
-                                new TronLightCycle(1, new Spot(0, 0)));
+                PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(0, 0));
                 ge.start();
 
                 Builder playerRound1 = newBuilder().withActions(new Action(RIGHT));
@@ -210,11 +185,7 @@ class PvPGETest implements WithAssertions {
             @DisplayName("if player collides against opponent")
             void whenPlayerCollidesAgainstOpponent() {
 
-                PvPGE ge =
-                        new PvPGE(
-                                true,
-                                new TronLightCycle(0, new Spot(15, 11)),
-                                new TronLightCycle(1, new Spot(15, 10)));
+                PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 11), new Spot(15, 10));
                 ge.start();
 
                 AI player = MockedAI.anyWithActions(new Action(UP));
@@ -234,11 +205,7 @@ class PvPGETest implements WithAssertions {
             @DisplayName("with player as winner if opponent goes outside the grid")
             public void whenOpponentGoesOusideTheGrid() {
 
-                PvPGE ge =
-                        new PvPGE(
-                                true,
-                                new TronLightCycle(0, new Spot(15, 10)),
-                                new TronLightCycle(1, new Spot(29, 10)));
+                PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(29, 10));
                 ge.start();
 
                 AI player = MockedAI.anyWithActions(new Action(RIGHT));
@@ -253,11 +220,7 @@ class PvPGETest implements WithAssertions {
             @DisplayName("if opponent collides against himself")
             void whenOpponentCollidesAgainstHimself() {
 
-                PvPGE ge =
-                        new PvPGE(
-                                true,
-                                new TronLightCycle(0, new Spot(0, 0)),
-                                new TronLightCycle(1, new Spot(15, 10)));
+                PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(0, 0), new Spot(15, 10));
                 ge.start();
 
                 Builder playerRound1 = newBuilder().withActions(new Action(RIGHT));
@@ -279,10 +242,7 @@ class PvPGETest implements WithAssertions {
             @DisplayName("if opponent collides against player")
             void whenOpponentCollidesAgainstPlayer() {
 
-                PvPGE ge = new PvPGE(
-                        true,
-                        new TronLightCycle(0, new Spot(15, 10)),
-                        new TronLightCycle(1, new Spot(15, 11)));
+                PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(15, 11));
                 ge.start();
 
                 AI player = MockedAI.anyWithActions(new Action(LEFT));
@@ -335,10 +295,7 @@ class PvPGETest implements WithAssertions {
         MultipleRoundMockedAI opponent =
                 new MultipleRoundMockedAI(builders2.toArray(new Builder[builders2.size()]));
 
-        PvPGE ge = new PvPGE(
-                true,
-                new TronLightCycle(0, new Spot(9, 4)),
-                new TronLightCycle(1, new Spot(29, 2)));
+        PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(9, 4), new Spot(29, 2));
         ge.start();
 
         while (ge.getWinner() == ON_GOING) {

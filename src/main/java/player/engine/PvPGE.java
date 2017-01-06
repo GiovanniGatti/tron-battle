@@ -1,37 +1,59 @@
 package player.engine;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import com.google.common.base.Preconditions;
+
 import player.Player.AI;
 import player.Player.Action;
+import player.Player.BattleField;
 import player.Player.Spot;
-import player.Player.TronLightCycle;
 import player.TronGameEngine;
 
-public class PvPGE extends ConfigurableGE {
+public final class PvPGE extends ConfigurableGE {
 
     private final TronGameEngine gameEngine;
-    private final Spot[] startSpots;
 
     private final boolean playerFirst;
+    private final Spot playerStartSpot;
+    private final Spot opponentStartSpot;
 
     private int playerScore;
     private int opponentScore;
 
-    PvPGE(boolean playerFirst, TronGameEngine gameEngine) {
-        super(Collections.emptyMap());
-        this.playerFirst = playerFirst;
-        this.gameEngine = gameEngine;
-        this.startSpots = new Spot[] { gameEngine.getStart(0), gameEngine.getStart(1) };
-        this.playerScore = 0;
-        this.opponentScore = 0;
+    public static PvPGE withFreshBattleField(boolean playerFirst, Spot playerStartSpot, Spot opponentStartSpot) {
+
+        BattleField battleField = new BattleField();
+        battleField.addLightCycleAt(playerStartSpot, playerStartSpot);
+        battleField.addLightCycleAt(opponentStartSpot, opponentStartSpot);
+
+        return new PvPGE(playerFirst, battleField, playerStartSpot, opponentStartSpot);
     }
 
-    public PvPGE(boolean playerFirst, TronLightCycle... lightCycles) {
-        this(playerFirst, new TronGameEngine(lightCycles));
+    public PvPGE(
+            boolean playerFirst,
+            BattleField battleField,
+            Spot playerStartSpot,
+            Spot opponentStartSpot) {
+
+        super(Collections.emptyMap());
+
+        Preconditions.checkArgument(battleField.hasLightCycleStartingAt(playerStartSpot),
+                "Player could not be found in grid at " + playerStartSpot);
+        Preconditions.checkArgument(battleField.hasLightCycleStartingAt(opponentStartSpot),
+                "Opponent could not be found in grid at " + opponentStartSpot);
+        Preconditions.checkArgument(battleField.getStartSpots().size() == 2,
+                "Found more players than expected in the battle field");
+
+        this.playerFirst = playerFirst;
+        this.gameEngine = new TronGameEngine(battleField);
+        this.playerStartSpot = playerStartSpot;
+        this.opponentStartSpot = opponentStartSpot;
+
+        this.playerScore = 0;
+        this.opponentScore = 0;
     }
 
     @Override
@@ -41,7 +63,7 @@ public class PvPGE extends ConfigurableGE {
 
     @Override
     protected Winner runRound(AI player, AI opponent) {
-        int firstId, secondId;
+        Spot firstStartSpot, secondStartSpot;
         AI first, second;
         Consumer<Spot> firstInput, secondInput;
         Consumer<Integer> metadataFirstInput, metadataSecondInput;
@@ -50,38 +72,38 @@ public class PvPGE extends ConfigurableGE {
             first = player;
             firstInput = this::toPlayerInput;
             metadataFirstInput = this::toPlayerInput;
-            firstId = 0;
+            firstStartSpot = playerStartSpot;
 
             second = opponent;
             secondInput = this::toOpponentInput;
             metadataSecondInput = this::toOpponentInput;
-            secondId = 1;
+            secondStartSpot = opponentStartSpot;
         } else {
             first = opponent;
             firstInput = this::toOpponentInput;
             metadataFirstInput = this::toOpponentInput;
-            firstId = 1;
+            firstStartSpot = opponentStartSpot;
 
             second = player;
             secondInput = this::toPlayerInput;
             metadataSecondInput = this::toPlayerInput;
-            secondId = 0;
+            secondStartSpot = playerStartSpot;
         }
 
         metadataFirstInput.accept(2);
         metadataFirstInput.accept(0);
 
-        firstInput.accept(gameEngine.getStart(firstId));
-        firstInput.accept(gameEngine.getCurrent(firstId));
-        firstInput.accept(gameEngine.getStart(secondId));
-        firstInput.accept(gameEngine.getCurrent(secondId));
+        firstInput.accept(firstStartSpot);
+        firstInput.accept(gameEngine.getCurrent(firstStartSpot));
+        firstInput.accept(secondStartSpot);
+        firstInput.accept(gameEngine.getCurrent(secondStartSpot));
 
         first.updateRepository();
         Action firstAction = first.play()[0];
 
-        gameEngine.perform(firstId, firstAction);
+        gameEngine.perform(firstStartSpot, firstAction.getType());
 
-        if (gameEngine.isDead(firstId)) {
+        if (gameEngine.isDead(firstStartSpot)) {
             return playerFirst ? Winner.OPPONENT : Winner.PLAYER;
         }
 
@@ -94,17 +116,17 @@ public class PvPGE extends ConfigurableGE {
         metadataSecondInput.accept(2);
         metadataSecondInput.accept(1);
 
-        secondInput.accept(gameEngine.getStart(firstId));
-        secondInput.accept(gameEngine.getCurrent(firstId));
-        secondInput.accept(gameEngine.getStart(secondId));
-        secondInput.accept(gameEngine.getCurrent(secondId));
+        secondInput.accept(firstStartSpot);
+        secondInput.accept(gameEngine.getCurrent(firstStartSpot));
+        secondInput.accept(secondStartSpot);
+        secondInput.accept(gameEngine.getCurrent(secondStartSpot));
 
         second.updateRepository();
         Action secondAction = second.play()[0];
 
-        gameEngine.perform(secondId, secondAction);
+        gameEngine.perform(secondStartSpot, secondAction.getType());
 
-        if (gameEngine.isDead(secondId)) {
+        if (gameEngine.isDead(secondStartSpot)) {
             return playerFirst ? Winner.PLAYER : Winner.OPPONENT;
         }
 
@@ -155,13 +177,16 @@ public class PvPGE extends ConfigurableGE {
 
         PvPGE pvPGE = (PvPGE) o;
         return playerFirst == pvPGE.playerFirst &&
-                Arrays.equals(startSpots, pvPGE.startSpots);
+                Objects.equals(gameEngine, pvPGE.gameEngine) &&
+                Objects.equals(playerStartSpot, pvPGE.playerStartSpot) &&
+                Objects.equals(opponentStartSpot, pvPGE.opponentStartSpot);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), startSpots, playerFirst);
+        return Objects.hash(super.hashCode(), gameEngine, playerFirst, playerStartSpot, opponentStartSpot);
     }
+
     //
     // @Override
     // public String toString() {

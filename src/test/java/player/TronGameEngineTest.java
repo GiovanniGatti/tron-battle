@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import player.Player.Action;
+import player.Player.BattleField;
 import player.Player.Spot;
-import player.Player.StrictEngine;
 import player.Player.TronLightCycle;
 
 @DisplayName("A tron game engine")
@@ -176,5 +176,12 @@ class TronGameEngineTest implements WithAssertions {
 
             assertThat(ge.isDead(0)).isTrue();
         }
+    }
+
+    private static TronGameEngine newWithEmptyBattleField(Spot playerStartSpot, Spot opponentStartSpot) {
+        BattleField battleField = new BattleField();
+        battleField.addLightCycleAt(playerStartSpot, playerStartSpot);
+        battleField.addLightCycleAt(opponentStartSpot, opponentStartSpot);
+        return new TronGameEngine(battleField);
     }
 }

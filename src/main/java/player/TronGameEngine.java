@@ -3,6 +3,7 @@ package player;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import player.Player.ActionsType;
 import player.Player.BattleField;
@@ -14,33 +15,36 @@ public final class TronGameEngine {
     private static final int MAX_Y = 20;
 
     private final BattleField battleField;
+    private final Set<Spot> deadPlayers;
 
     public TronGameEngine(BattleField battleField) {
-        this.battleField = battleField;
+        this.battleField = new BattleField(battleField);
+        this.deadPlayers = new HashSet<>();
     }
 
     public void perform(Spot startSpot, ActionsType action) {
 
         if (!battleField.hasLightCycleStartingAt(startSpot)) {
-            throw new IllegalStateException("Unknown user starting at " + startSpot);
+            throw new IllegalArgumentException("Unknown user starting at " + startSpot);
         }
 
         Spot current = battleField.getCurrentSpot(startSpot);
         Spot next = current.next(action);
 
         if (next.getX() >= 0 && next.getX() < MAX_X && next.getY() >= 0 && next.getY() < MAX_Y) {
-            if (battleField.hasBeenVisited(next)) {
+            if (!battleField.hasBeenVisited(next)) {
                 battleField.moveTo(startSpot, next);
                 return;
             }
         }
 
         // invalid movement
+        deadPlayers.add(startSpot);
         battleField.killLightCycles(new HashSet<>(Collections.singletonList(startSpot)));
     }
 
     public boolean isDead(Spot startSpot) {
-        return battleField.hasLightCycleStartingAt(startSpot);
+        return deadPlayers.contains(startSpot);
     }
 
     public Spot getCurrent(Spot startSpot) {

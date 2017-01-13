@@ -501,6 +501,17 @@ public final class Player {
             this.visitedSpots = new HashMap<>();
         }
 
+        public BattleField(BattleField another) {
+            this.currentSpot = new HashMap<>(another.currentSpot);
+            this.visitedSpots = new HashMap<>(another.visitedSpots);
+            this.grid = new boolean[another.grid.length][another.grid[0].length];
+
+            int i = 0;
+            for (boolean[] row : another.grid) {
+                System.arraycopy(row, 0, grid[i++], 0, row.length);
+            }
+        }
+
         public Set<Spot> getLightCyclesStartingSpots() {
             return currentSpot.keySet();
         }

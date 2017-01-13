@@ -5,15 +5,15 @@ import static player.Player.ActionsType.LEFT;
 import static player.Player.ActionsType.RIGHT;
 import static player.Player.ActionsType.UP;
 
+import java.util.stream.Stream;
+
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import player.Player.Action;
 import player.Player.BattleField;
 import player.Player.Spot;
-import player.Player.TronLightCycle;
 
 @DisplayName("A tron game engine")
 class TronGameEngineTest implements WithAssertions {
@@ -21,103 +21,61 @@ class TronGameEngineTest implements WithAssertions {
     @Test
     @DisplayName("keeps the player alive when anyone else collides against him")
     void keepsThePlayerAliveWhenAnyoneElseCollidesAgainstHim() {
-        TronGameEngine ge =
-                new TronGameEngine(
-                        new TronLightCycle(0, new Spot(5, 5)),
-                        new TronLightCycle(1, new Spot(5, 6)));
+        Spot player1 = new Spot(5, 5);
+        Spot player2 = new Spot(5, 6);
 
-        ge.perform(1, new Action(UP));
+        TronGameEngine ge = newWithEmptyBattleField(player1, player2);
 
-        assertThat(ge.isDead(0)).isFalse();
+        ge.perform(player2, UP);
+
+        assertThat(ge.isDead(player1)).isFalse();
     }
 
     @Test
-    @DisplayName("takes of dead players from the map on strict mode")
-    void takesOfDeadPlayersFromTheMapOnStrictMode() {
-        TronGameEngine ge = new TronGameEngine(
-                new TronLightCycle(0, new Spot(5, 5)),
-                new TronLightCycle(1, new Spot(7, 5)),
-                new TronLightCycle(2, new Spot(7, 3)));
+    @DisplayName("takes of dead players from the map")
+    void takesOfDeadPlayersFromTheMap() {
+        Spot player1 = new Spot(5, 5);
+        Spot player2 = new Spot(7, 5);
+        Spot player3 = new Spot(7, 3);
 
-        ge.perform(true, 0, new Action(RIGHT));
-        ge.perform(true, 1, new Action(LEFT)); // 1 collides against 0
-        ge.perform(true, 2, new Action(DOWN));
+        TronGameEngine ge = newWithEmptyBattleField(player1, player2, player3);
 
-        assertThat(ge.isDead(0)).isFalse();
-        assertThat(ge.isDead(1)).isTrue();
-        assertThat(ge.isDead(2)).isFalse();
+        ge.perform(player1, RIGHT);
+        ge.perform(player2, LEFT); // 2 collides against 1
+        ge.perform(player3, DOWN);
 
-        ge.perform(true, 0, new Action(UP));
-        ge.perform(true, 2, new Action(DOWN)); // 1 is dead, than no collision occurs
+        assertThat(ge.isDead(player1)).isFalse();
+        assertThat(ge.isDead(player2)).isTrue();
+        assertThat(ge.isDead(player3)).isFalse();
 
-        assertThat(ge.isDead(0)).isFalse();
-        assertThat(ge.isDead(1)).isTrue();
-        assertThat(ge.isDead(2)).isFalse();
+        ge.perform(player1, UP);
+        ge.perform(player3, DOWN); // 2 is dead, than no collision occurs
 
-        ge.perform(true, 0, new Action(RIGHT)); // 0 collides against 2
-        ge.perform(true, 2, new Action(LEFT)); // 0 is dead, than no collision occurs
+        assertThat(ge.isDead(player1)).isFalse();
+        assertThat(ge.isDead(player2)).isTrue();
+        assertThat(ge.isDead(player3)).isFalse();
 
-        assertThat(ge.isDead(0)).isTrue();
-        assertThat(ge.isDead(1)).isTrue();
-        assertThat(ge.isDead(2)).isFalse();
+        ge.perform(player1, RIGHT); // 1 collides against 3
+        ge.perform(player3, LEFT); // 1 is dead, than no collision occurs
+
+        assertThat(ge.isDead(player1)).isTrue();
+        assertThat(ge.isDead(player2)).isTrue();
+        assertThat(ge.isDead(player3)).isFalse();
     }
 
     @Test
-    @DisplayName("does not take dead players from the map on relaxed mode")
-    void doesNotTakeDeadPlayersFromTheMapOnRelaxedMode() {
-        TronGameEngine ge =
-                new TronGameEngine(
-                        new TronLightCycle(0, new Spot(5, 5)),
-                        new TronLightCycle(1, new Spot(7, 5)),
-                        new TronLightCycle(2, new Spot(7, 3)));
+    @DisplayName("does not let dead players to perform movements")
+    void doesNotLetDeadPlayersToPerformMovements() {
+        Spot player = new Spot(5, 5);
 
-        ge.perform(false, 0, new Action(RIGHT));
-        ge.perform(false, 1, new Action(LEFT)); // 1 collides against 0
-        ge.perform(false, 2, new Action(DOWN));
+        TronGameEngine ge = newWithEmptyBattleField(player);
 
-        assertThat(ge.isDead(0)).isFalse();
-        assertThat(ge.isDead(1)).isTrue();
-        assertThat(ge.isDead(2)).isFalse();
+        ge.perform(player, UP);
+        ge.perform(player, DOWN); // kills himself
 
-        ge.perform(false, 0, new Action(UP));
-        ge.perform(false, 2, new Action(DOWN)); // 1 is dead, but as we are on relaxed mode, he is still there
-
-        assertThat(ge.isDead(0)).isFalse();
-        assertThat(ge.isDead(1)).isTrue();
-        assertThat(ge.isDead(2)).isTrue();
-
-        ge.perform(false, 0, new Action(RIGHT));// 1 is dead, but as we are on relaxed mode, he is still there
-
-        assertThat(ge.isDead(0)).isTrue();
-        assertThat(ge.isDead(1)).isTrue();
-        assertThat(ge.isDead(2)).isTrue();
-    }
-
-    @Test
-    @DisplayName("does not let dead players to perform movements on strict mode")
-    void doesNotLetDeadPlayersToPerformMovementsOnStrictMode() {
-        TronGameEngine ge = new TronGameEngine(new TronLightCycle(0, new Spot(5, 5)));
-
-        ge.perform(true, 0, new Action(UP));
-        ge.perform(true, 0, new Action(DOWN)); // kills himself
-
-        ge.perform(true, 0, new Action(LEFT));
-
-        assertThat(ge.getCurrent(0)).isEqualTo(new Spot(5, 4));
-    }
-
-    @Test
-    @DisplayName("lets dead players to perform movements on relaxed mode")
-    void doesNotLetDeadPlayersToPerformMovementsOnRelaxedMode() {
-        TronGameEngine ge = new TronGameEngine(new TronLightCycle(0, new Spot(5, 5)));
-
-        ge.perform(false, 0, new Action(UP));
-        ge.perform(false, 0, new Action(DOWN)); // kills himself
-
-        ge.perform(false, 0, new Action(LEFT));
-
-        assertThat(ge.getCurrent(0)).isEqualTo(new Spot(4, 4));
-        assertThat(ge.isDead(0)).isTrue();
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> ge.perform(player, LEFT))
+                .withMessage("Unknown user starting at (5, 5)");
     }
 
     @Nested
@@ -127,61 +85,71 @@ class TronGameEngineTest implements WithAssertions {
         @Test
         @DisplayName("when he goes through the map's north border")
         void whenHeGoesThroughTheMapsNorthBorder() {
-            TronGameEngine ge = new TronGameEngine(new TronLightCycle(0, new Spot(15, 0)));
+            Spot player = new Spot(15, 0);
 
-            ge.perform(0, new Action(UP));
+            TronGameEngine ge = newWithEmptyBattleField(player);
 
-            assertThat(ge.isDead(0)).isTrue();
+            ge.perform(player, UP);
+
+            assertThat(ge.isDead(player)).isTrue();
         }
 
         @Test
         @DisplayName("when he goes through the map's south border")
         void whenHeGoesThroughTheMapsSouthBorder() {
-            TronGameEngine ge = new TronGameEngine(new TronLightCycle(0, new Spot(15, 19)));
+            Spot player = new Spot(15, 19);
 
-            ge.perform(0, new Action(DOWN));
+            TronGameEngine ge = newWithEmptyBattleField(player);
 
-            assertThat(ge.isDead(0)).isTrue();
+            ge.perform(player, DOWN);
+
+            assertThat(ge.isDead(player)).isTrue();
         }
 
         @Test
         @DisplayName("when he goes through the map's east border")
         void whenHeGoesThroughTheMapsEastBorder() {
-            TronGameEngine ge = new TronGameEngine(new TronLightCycle(0, new Spot(0, 10)));
+            Spot player = new Spot(0, 10);
 
-            ge.perform(0, new Action(LEFT));
+            TronGameEngine ge = newWithEmptyBattleField(player);
 
-            assertThat(ge.isDead(0)).isTrue();
+            ge.perform(player, LEFT);
+
+            assertThat(ge.isDead(player)).isTrue();
         }
 
         @Test
         @DisplayName("when he goes through the map's west border")
         void whenHeGoesThroughTheMapsWestBorder() {
-            TronGameEngine ge = new TronGameEngine(new TronLightCycle(0, new Spot(29, 10)));
+            Spot player = new Spot(29, 10);
 
-            ge.perform(0, new Action(RIGHT));
+            TronGameEngine ge = newWithEmptyBattleField(player);
 
-            assertThat(ge.isDead(0)).isTrue();
+            ge.perform(player, RIGHT);
+
+            assertThat(ge.isDead(player)).isTrue();
         }
 
         @Test
         @DisplayName("when he collides against another player")
         void whenHeCollidesAgainstAnotherPlayer() {
-            TronGameEngine ge =
-                    new TronGameEngine(
-                            new TronLightCycle(0, new Spot(5, 5)),
-                            new TronLightCycle(1, new Spot(5, 6)));
+            Spot player1 = new Spot(5, 5);
+            Spot player2 = new Spot(5, 6);
 
-            ge.perform(0, new Action(DOWN));
+            TronGameEngine ge = newWithEmptyBattleField(player1, player2);
 
-            assertThat(ge.isDead(0)).isTrue();
+            ge.perform(player1, DOWN);
+
+            assertThat(ge.isDead(player1)).isTrue();
         }
     }
 
-    private static TronGameEngine newWithEmptyBattleField(Spot playerStartSpot, Spot opponentStartSpot) {
+    private static TronGameEngine newWithEmptyBattleField(Spot playerSpot, Spot... playersStartSpot) {
         BattleField battleField = new BattleField();
-        battleField.addLightCycleAt(playerStartSpot, playerStartSpot);
-        battleField.addLightCycleAt(opponentStartSpot, opponentStartSpot);
+
+        Stream.concat(Stream.of(playerSpot), Stream.of(playersStartSpot))
+                .forEach((spot) -> battleField.addLightCycleAt(spot, spot));
+
         return new TronGameEngine(battleField);
     }
 }

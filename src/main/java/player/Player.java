@@ -53,13 +53,11 @@ public final class Player {
 
             Set<Spot> startSpots = snapshot.getStartSpots();
             this.currentSpots = new HashMap<>(startSpots.size());
-            for (Spot spot : startSpots) {
-                currentSpots.put(spot, snapshot.getCurrentSpot(spot));
-            }
+            startSpots.forEach(s -> this.currentSpots.put(s, snapshot.getCurrentSpot(s)));
         }
 
         /**
-         * Simutales the action for a specific player
+         * Simulates the action for a specific player
          *
          * @param startAt the players start position
          * @param action where to go
@@ -74,7 +72,10 @@ public final class Player {
 
             Spot next = currentSpot.next(action);
 
-            if (grid[next.getY()][next.getX()] || snapshot.hasBeenVisited(next)) {
+            if (next.getX() >= MAX_X
+                    || next.getY() >= MAX_Y
+                    || grid[next.getY()][next.getX()]
+                    || snapshot.hasBeenVisited(next)) {
                 return false;
             }
 
@@ -522,7 +523,7 @@ public final class Player {
 
         public void addLightCycleAt(Spot startSpot, Spot currentSpot) {
 
-            if (!startSpot.equals(currentSpot) && !startSpot.isNeigborOf(currentSpot)) {
+            if (!startSpot.equals(currentSpot) && !startSpot.isNeighborOf(currentSpot)) {
                 throw new IllegalStateException(
                         "Cannot add non-neighbors spots start=" + startSpot +
                                 ", current=" + currentSpot);
@@ -543,7 +544,7 @@ public final class Player {
         public void moveTo(Spot startSpot, Spot currentSpot) {
             Spot past = this.currentSpot.get(startSpot);
 
-            if (past == null || !past.isNeigborOf(currentSpot)) {
+            if (past == null || !past.isNeighborOf(currentSpot)) {
                 throw new IllegalStateException("Cannot move from " + past + " to " + currentSpot);
             }
 
@@ -578,7 +579,7 @@ public final class Player {
         }
 
         public BattleFieldSnapshot getSnapshot() {
-            return new BattleFieldSnapshot(grid, currentSpot, visitedSpots);
+            return new BattleFieldSnapshot(grid, currentSpot);
         }
 
         @Override
@@ -607,22 +608,15 @@ public final class Player {
 
         private final boolean[][] grid;
         private final Map<Spot, Spot> currentSpots;
-        private final Map<Spot, Set<Spot>> visitedSpots;
 
         public BattleFieldSnapshot(
                 boolean[][] grid,
-                Map<Spot, Spot> currentSpots,
-                Map<Spot, Set<Spot>> visitedSpots) {
+                Map<Spot, Spot> currentSpots) {
 
             // In order to optimize, we won't be copying the arena's state,
             // and therefore after each round the snapshot is deprecated
             this.grid = grid;
             this.currentSpots = currentSpots;
-            this.visitedSpots = visitedSpots;
-        }
-
-        public boolean playerOnGrid(Spot currentSpot) {
-            return currentSpots.containsKey(currentSpot) && visitedSpots.containsKey(currentSpot);
         }
 
         public Set<Spot> getStartSpots() {
@@ -635,10 +629,6 @@ public final class Player {
 
         public boolean hasBeenVisited(Spot spot) {
             return grid[spot.getY()][spot.getX()];
-        }
-
-        public Set<Spot> getVisitedSpots(Spot startSpot) {
-            return Collections.unmodifiableSet(visitedSpots.get(startSpot));
         }
     }
 
@@ -672,7 +662,7 @@ public final class Player {
                     y == spot.y;
         }
 
-        public boolean isNeigborOf(Spot spot) {
+        public boolean isNeighborOf(Spot spot) {
             return (x + 1 == spot.x && y == spot.y) ||
                     (x - 1 == spot.x && y == spot.y) ||
                     (x == spot.x && y - 1 == spot.y) ||

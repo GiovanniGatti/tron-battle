@@ -47,7 +47,7 @@ class PvPGETest implements WithAssertions {
     @DisplayName("finishes before player move if opponent kills himself when opponent plays first")
     void opponentGoesFirst() {
 
-        PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(29, 10), new Spot(0, 10));
+        PvPGE ge = PvPGE.withFreshBattleField(false, new Spot(29, 10), new Spot(0, 10));
         ge.start();
 
         AI player = MockedAI.anyWithActions(new Action(RIGHT));
@@ -101,7 +101,7 @@ class PvPGETest implements WithAssertions {
     @DisplayName("maps correctly input when opponent starts")
     void mapsInputWhenOpponentStarts() {
 
-        PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(0, 10));
+        PvPGE ge = PvPGE.withFreshBattleField(false, new Spot(15, 10), new Spot(0, 10));
         ge.start();
 
         AI player = MockedAI.anyWithActions(new Action(RIGHT));
@@ -258,7 +258,7 @@ class PvPGETest implements WithAssertions {
     @Test
     @DisplayName("can simulate a full match")
     void canSimulateAFullMatch() {
-        // automatic generated
+        // automatically generated
         Action[] playerActions =
                 actionsOf(UP, LEFT, DOWN, DOWN, RIGHT, RIGHT, UP, UP, UP, LEFT, LEFT, LEFT, DOWN, DOWN, DOWN, DOWN,
                         RIGHT, RIGHT, RIGHT, RIGHT, UP, UP, UP, UP, UP, RIGHT, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN,

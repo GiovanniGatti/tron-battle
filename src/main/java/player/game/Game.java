@@ -87,6 +87,7 @@ public class Game implements Callable<Game.GameResult> {
                     "Illegal usage, opponents should always be the same, but found lastOpponent=%s, opponent=%s",
                     lastOpponent, opponent);
 
+            //FIXME: GameEngine is stateful, which may create different final states for the same start
             Preconditions.checkArgument(
                     lastGameEngine == null || lastGameEngine.equals(gameEngine),
                     "Illegal usage, game engines should always be the same, " +

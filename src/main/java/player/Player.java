@@ -72,8 +72,7 @@ public final class Player {
 
             Spot next = currentSpot.next(action);
 
-            if (next.getX() >= MAX_X
-                    || next.getY() >= MAX_Y
+            if ((next.getX() < 0 || next.getX() >= MAX_X || next.getY() < 0 || next.getY() >= MAX_Y)
                     || grid[next.getY()][next.getX()]
                     || snapshot.hasBeenVisited(next)) {
                 return false;
@@ -93,11 +92,11 @@ public final class Player {
         }
 
         private static double evaluate(TronSimulator engine, Spot startAt, ActionsType[] actions) {
-            double score = 0;
+            double score = 0.0;
 
             for (ActionsType action : actions) {
 
-                if (engine.perform(startAt, action)) {
+                if (!engine.perform(startAt, action)) {
                     break;
                 }
 
@@ -127,7 +126,6 @@ public final class Player {
         private final double crossoverRate;
         private final double mutationRate;
         private final EvaluationFunction evaluationFunction;
-        private final BattleFieldSnapshot battleFieldSnapshot;
 
         public GeneticAI(
                 boolean eletism,
@@ -149,7 +147,6 @@ public final class Player {
             this.evaluationFunction = evaluationFunction;
             this.random = new Random();
             this.repo = repo;
-            battleFieldSnapshot = repo.getBattleField();
         }
 
         public GeneticAI(
@@ -180,6 +177,8 @@ public final class Player {
             // Create the pool
             List<Chromosome> pool = new ArrayList<>(popSize);
             List<Chromosome> newPool = new ArrayList<>(popSize);
+
+            BattleFieldSnapshot battleFieldSnapshot = repo.getBattleField();
 
             // Generate unique chromosomes in the pool
             for (int i = 0; i < popSize; i++) {
@@ -460,10 +459,10 @@ public final class Player {
                 lightCyclesAlive.add(startSpot);
             }
 
-            List<Spot> killedLightCycles = new ArrayList<>(battleField.getLightCyclesStartingSpots());
+            Set<Spot> killedLightCycles = new HashSet<>(battleField.getLightCyclesStartingSpots());
             killedLightCycles.removeAll(lightCyclesAlive);
 
-            battleField.killLightCycles(lightCyclesAlive);
+            battleField.killLightCycles(killedLightCycles);
         }
 
         public int getN() {

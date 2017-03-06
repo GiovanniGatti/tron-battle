@@ -22,8 +22,8 @@ class TronSimulatorTest implements WithAssertions {
     class EndsTheMatch {
 
         @Test
-        @DisplayName("if player goes outside the grid")
-        void whenPlayerGoesOutsideTheGrid() {
+        @DisplayName("if player goes outside the grid by right border")
+        void whenPlayerGoesOutsideTheGridByRightBorder() {
 
             Spot playerStartSpot = new Spot(29, 10);
             Spot opponentStartSpot = new Spot(0, 10);
@@ -31,6 +31,42 @@ class TronSimulatorTest implements WithAssertions {
             TronSimulator ge = withFreshBattleField(playerStartSpot, opponentStartSpot);
 
             assertThat(ge.perform(playerStartSpot, RIGHT)).isFalse();
+        }
+
+        @Test
+        @DisplayName("if player goes outside the grid by left border")
+        void whenPlayerGoesOutsideTheGridByLeftBorder() {
+
+            Spot playerStartSpot = new Spot(0, 10);
+            Spot opponentStartSpot = new Spot(0, 10);
+
+            TronSimulator ge = withFreshBattleField(playerStartSpot, opponentStartSpot);
+
+            assertThat(ge.perform(playerStartSpot, LEFT)).isFalse();
+        }
+
+        @Test
+        @DisplayName("if player goes outside the grid by upper border")
+        void whenPlayerGoesOutsideTheGridByUpperBorder() {
+
+            Spot playerStartSpot = new Spot(15, 0);
+            Spot opponentStartSpot = new Spot(0, 10);
+
+            TronSimulator ge = withFreshBattleField(playerStartSpot, opponentStartSpot);
+
+            assertThat(ge.perform(playerStartSpot, UP)).isFalse();
+        }
+
+        @Test
+        @DisplayName("if player goes outside the grid by lower border")
+        void whenPlayerGoesOutsideTheGridByLowerBorder() {
+
+            Spot playerStartSpot = new Spot(15, 19);
+            Spot opponentStartSpot = new Spot(0, 10);
+
+            TronSimulator ge = withFreshBattleField(playerStartSpot, opponentStartSpot);
+
+            assertThat(ge.perform(playerStartSpot, DOWN)).isFalse();
         }
 
         @Test

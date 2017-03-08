@@ -189,10 +189,4 @@ public final class PvPGE extends ConfigurableGE {
     public int hashCode() {
         return Objects.hash(super.hashCode(), initialState, playerFirst, playerStartSpot, opponentStartSpot);
     }
-
-
-     @Override
-     public String toString() {
-     return "initialState: " + initialState.hashCode();
-     }
 }

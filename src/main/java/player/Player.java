@@ -496,14 +496,17 @@ public final class Player {
         private final Map<Spot, Set<Spot>> visitedSpots;
 
         public BattleField() {
-            this.currentSpot = new HashMap<>();
             this.grid = new boolean[MAX_Y][MAX_X];
+            this.currentSpot = new HashMap<>();
             this.visitedSpots = new HashMap<>();
         }
 
         public BattleField(BattleField another) {
             this.currentSpot = new HashMap<>(another.currentSpot);
-            this.visitedSpots = new HashMap<>(another.visitedSpots);
+            this.visitedSpots = new HashMap<>(another.visitedSpots.size());
+
+            another.visitedSpots.forEach((key, value) -> this.visitedSpots.put(key, new HashSet<>(value)));
+
             this.grid = new boolean[another.grid.length][another.grid[0].length];
 
             int i = 0;
@@ -592,7 +595,7 @@ public final class Player {
             }
 
             BattleField that = (BattleField) o;
-            return Arrays.equals(grid, that.grid) &&
+            return Arrays.deepEquals(grid, that.grid) &&
                     Objects.equals(currentSpot, that.currentSpot) &&
                     Objects.equals(visitedSpots, that.visitedSpots);
         }
@@ -648,19 +651,6 @@ public final class Player {
             return y;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Spot spot = (Spot) o;
-            return x == spot.x &&
-                    y == spot.y;
-        }
-
         public boolean isNeighborOf(Spot spot) {
             return (x + 1 == spot.x && y == spot.y) ||
                     (x - 1 == spot.x && y == spot.y) ||
@@ -685,6 +675,19 @@ public final class Player {
             default:
                 throw new IllegalStateException("Unknown action type " + type);
             }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Spot spot = (Spot) o;
+            return x == spot.x &&
+                    y == spot.y;
         }
 
         @Override

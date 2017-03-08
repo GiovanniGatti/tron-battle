@@ -14,6 +14,8 @@ import player.TronGameEngine;
 
 public final class PvPGE extends ConfigurableGE {
 
+    private final BattleField initialState;
+
     private final TronGameEngine gameEngine;
 
     private final boolean playerFirst;
@@ -48,6 +50,7 @@ public final class PvPGE extends ConfigurableGE {
                 "Found more players than expected in the battle field");
 
         this.playerFirst = playerFirst;
+        this.initialState = new BattleField(battleField);
         this.gameEngine = new TronGameEngine(battleField);
         this.playerStartSpot = playerStartSpot;
         this.opponentStartSpot = opponentStartSpot;
@@ -177,19 +180,19 @@ public final class PvPGE extends ConfigurableGE {
 
         PvPGE pvPGE = (PvPGE) o;
         return playerFirst == pvPGE.playerFirst &&
-                Objects.equals(gameEngine, pvPGE.gameEngine) &&
+                Objects.equals(initialState, pvPGE.initialState) &&
                 Objects.equals(playerStartSpot, pvPGE.playerStartSpot) &&
                 Objects.equals(opponentStartSpot, pvPGE.opponentStartSpot);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), gameEngine, playerFirst, playerStartSpot, opponentStartSpot);
+        return Objects.hash(super.hashCode(), initialState, playerFirst, playerStartSpot, opponentStartSpot);
     }
 
-    //
-    // @Override
-    // public String toString() {
-    // return gameEngine.toString();
-    // }
+
+     @Override
+     public String toString() {
+     return "initialState: " + initialState.hashCode();
+     }
 }

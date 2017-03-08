@@ -23,14 +23,10 @@ public final class GameRunner {
         Spot playerStartSpot = new Spot(15, 10);
         Spot opponentStartSpot = new Spot(0, 0);
 
-        BattleField battleField = new BattleField();
-        battleField.addLightCycleAt(playerStartSpot, playerStartSpot);
-        battleField.addLightCycleAt(opponentStartSpot, opponentStartSpot);
-
         Game game = new Game(
                 playerInput -> () -> new SnailAI(new KnowledgeRepo(playerInput)),
                 opponentInput -> () -> new LongestSequenceAI(new Player.InputRepository(opponentInput)),
-                () -> new PvPGE(false, battleField, playerStartSpot, opponentStartSpot),
+                () -> PvPGE.withFreshBattleField(false, playerStartSpot, opponentStartSpot),
                 pool);
 
         Game.GameResult call = game.call();

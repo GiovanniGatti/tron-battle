@@ -14,7 +14,7 @@ import player.engine.Winner;
  * Represents a single match between any two IAs
  *
  */
-public final class Match implements Callable<Match.MatchResult> {
+public final class Match implements Callable<MatchResult> {
 
     private final AI player;
     private final AI opponent;
@@ -32,7 +32,6 @@ public final class Match implements Callable<Match.MatchResult> {
 
     @Override
     public MatchResult call() {
-        gameEngine.start();
 
         do {
             gameEngine.run(player, opponent);
@@ -41,81 +40,10 @@ public final class Match implements Callable<Match.MatchResult> {
         return new MatchResult(
                 player,
                 opponent,
-                gameEngine,
+                gameEngine.getInitialState(),
                 gameEngine.getPlayerScore(),
                 gameEngine.getOpponentScore(),
                 gameEngine.getNumberOfRounds(),
                 gameEngine.getWinner());
-    }
-
-    public static final class MatchResult {
-
-        private final AI player;
-        private final AI opponent;
-        private final GameEngine gameEngine;
-        private final int playerScore;
-        private final int opponentScore;
-        private final int rounds;
-        private final Winner winner;
-
-        private MatchResult(
-                AI player,
-                AI opponent,
-                GameEngine gameEngine,
-                int playerScore,
-                int opponentScore,
-                int rounds,
-                Winner winner) {
-
-            this.player = player;
-            this.opponent = opponent;
-            this.gameEngine = gameEngine;
-
-            this.playerScore = playerScore;
-            this.opponentScore = opponentScore;
-            this.rounds = rounds;
-            this.winner = winner;
-        }
-
-        public AI getPlayer() {
-            return player;
-        }
-
-        public AI getOpponent() {
-            return opponent;
-        }
-
-        public GameEngine getGameEngine() {
-            return gameEngine;
-        }
-
-        public int getPlayerScore() {
-            return playerScore;
-        }
-
-        public int getOpponentScore() {
-            return opponentScore;
-        }
-
-        public int getRounds() {
-            return rounds;
-        }
-
-        public Winner getWinner() {
-            return winner;
-        }
-
-        @Override
-        public String toString() {
-            return com.google.common.base.MoreObjects.toStringHelper(this)
-                    .add("player", player)
-                    .add("opponent", opponent)
-                    .add("gameEngine", gameEngine)
-                    .add("playerScore", playerScore)
-                    .add("opponentScore", opponentScore)
-                    .add("rounds", rounds)
-                    .add("winner", winner)
-                    .toString();
-        }
     }
 }

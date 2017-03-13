@@ -33,7 +33,6 @@ class PvPGETest implements WithAssertions {
     void playerGoesFirst() {
 
         PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(29, 10), new Spot(0, 10));
-        ge.start();
 
         AI player = MockedAI.anyWithActions(new Action(RIGHT));
         AI opponent = MockedAI.anyWithActions(new Action(LEFT));
@@ -48,7 +47,6 @@ class PvPGETest implements WithAssertions {
     void opponentGoesFirst() {
 
         PvPGE ge = PvPGE.withFreshBattleField(false, new Spot(29, 10), new Spot(0, 10));
-        ge.start();
 
         AI player = MockedAI.anyWithActions(new Action(RIGHT));
         AI opponent = MockedAI.anyWithActions(new Action(LEFT));
@@ -63,7 +61,6 @@ class PvPGETest implements WithAssertions {
     void mapsInputWhenPlayerStarts() {
 
         PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(0, 10));
-        ge.start();
 
         AI player = MockedAI.anyWithActions(new Action(RIGHT));
         AI opponent = MockedAI.anyWithActions(new Action(LEFT));
@@ -102,7 +99,6 @@ class PvPGETest implements WithAssertions {
     void mapsInputWhenOpponentStarts() {
 
         PvPGE ge = PvPGE.withFreshBattleField(false, new Spot(15, 10), new Spot(0, 10));
-        ge.start();
 
         AI player = MockedAI.anyWithActions(new Action(RIGHT));
         AI opponent = MockedAI.anyWithActions(new Action(RIGHT));
@@ -149,7 +145,6 @@ class PvPGETest implements WithAssertions {
             void whenPlayerGoesOusideTheGrid() {
 
                 PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(29, 10), new Spot(15, 10));
-                ge.start();
 
                 AI player = MockedAI.anyWithActions(new Action(RIGHT));
                 AI opponent = MockedAI.anyWithActions(new Action(RIGHT));
@@ -164,7 +159,6 @@ class PvPGETest implements WithAssertions {
             void whenPlayerCollidesAgainstHimself() {
 
                 PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(0, 0));
-                ge.start();
 
                 Builder playerRound1 = newBuilder().withActions(new Action(RIGHT));
                 Builder playerRound2 = newBuilder().withActions(new Action(LEFT));
@@ -186,7 +180,6 @@ class PvPGETest implements WithAssertions {
             void whenPlayerCollidesAgainstOpponent() {
 
                 PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 11), new Spot(15, 10));
-                ge.start();
 
                 AI player = MockedAI.anyWithActions(new Action(UP));
                 AI opponent = MockedAI.anyWithActions(new Action(LEFT));
@@ -206,7 +199,6 @@ class PvPGETest implements WithAssertions {
             public void whenOpponentGoesOusideTheGrid() {
 
                 PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(29, 10));
-                ge.start();
 
                 AI player = MockedAI.anyWithActions(new Action(RIGHT));
                 AI opponent = MockedAI.anyWithActions(new Action(RIGHT));
@@ -221,7 +213,6 @@ class PvPGETest implements WithAssertions {
             void whenOpponentCollidesAgainstHimself() {
 
                 PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(0, 0), new Spot(15, 10));
-                ge.start();
 
                 Builder playerRound1 = newBuilder().withActions(new Action(RIGHT));
                 Builder playerRound2 = newBuilder().withActions(new Action(RIGHT));
@@ -243,7 +234,6 @@ class PvPGETest implements WithAssertions {
             void whenOpponentCollidesAgainstPlayer() {
 
                 PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(15, 11));
-                ge.start();
 
                 AI player = MockedAI.anyWithActions(new Action(LEFT));
                 AI opponent = MockedAI.anyWithActions(new Action(UP));
@@ -296,7 +286,6 @@ class PvPGETest implements WithAssertions {
                 new MultipleRoundMockedAI(builders2.toArray(new Builder[builders2.size()]));
 
         PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(9, 4), new Spot(29, 2));
-        ge.start();
 
         while (ge.getWinner() == ON_GOING) {
             ge.run(player, opponent);

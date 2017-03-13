@@ -134,11 +134,6 @@ class ConfigurableGETest implements WithAssertions {
         }
 
         @Override
-        public void start() {
-            // ILB
-        }
-
-        @Override
         public int getPlayerScore() {
             return 0;
         }
@@ -146,6 +141,11 @@ class ConfigurableGETest implements WithAssertions {
         @Override
         public int getOpponentScore() {
             return 0;
+        }
+
+        @Override
+        public State getInitialState() {
+            return null;
         }
 
         @Override

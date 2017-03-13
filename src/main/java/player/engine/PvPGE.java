@@ -4,6 +4,9 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.base.Preconditions;
 
 import player.Player.AI;
@@ -14,7 +17,7 @@ import player.TronGameEngine;
 
 public final class PvPGE extends ConfigurableGE {
 
-    private final BattleField initialState;
+    private final State initialState;
 
     private final TronGameEngine gameEngine;
 
@@ -50,18 +53,13 @@ public final class PvPGE extends ConfigurableGE {
                 "Found more players than expected in the battle field");
 
         this.playerFirst = playerFirst;
-        this.initialState = new BattleField(battleField);
+        this.initialState = new InitialStateSnapshot(battleField);
         this.gameEngine = new TronGameEngine(battleField);
         this.playerStartSpot = playerStartSpot;
         this.opponentStartSpot = opponentStartSpot;
 
         this.playerScore = 0;
         this.opponentScore = 0;
-    }
-
-    @Override
-    public void start() {
-        // ILB
     }
 
     @Override
@@ -152,6 +150,11 @@ public final class PvPGE extends ConfigurableGE {
         return opponentScore;
     }
 
+    @Override
+    public State getInitialState() {
+        return initialState;
+    }
+
     private void toPlayerInput(Spot... spots) {
         for (Spot spot : spots) {
             super.toPlayerInput(spot.getX(), spot.getY());
@@ -165,7 +168,7 @@ public final class PvPGE extends ConfigurableGE {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
@@ -188,5 +191,34 @@ public final class PvPGE extends ConfigurableGE {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), initialState, playerFirst, playerStartSpot, opponentStartSpot);
+    }
+
+    @Immutable
+    private static class InitialStateSnapshot implements State {
+
+        private final BattleField battleField;
+
+        public InitialStateSnapshot(BattleField battleField) {
+            this.battleField = new BattleField(battleField);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            InitialStateSnapshot that = (InitialStateSnapshot) o;
+            return Objects.equals(battleField, that.battleField);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(battleField);
+        }
     }
 }

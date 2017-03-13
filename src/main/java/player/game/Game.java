@@ -16,9 +16,10 @@ import com.google.common.base.Preconditions;
 
 import player.Player.AI;
 import player.engine.GameEngine;
+import player.engine.State;
 import player.engine.Winner;
 import player.match.Match;
-import player.match.Match.MatchResult;
+import player.match.MatchResult;
 
 /**
  * Plays multiple matches between to AIs. It is useful when IAs or State supplier are not deterministic,
@@ -68,14 +69,14 @@ public class Game implements Callable<Game.GameResult> {
 
         AI lastPlayer = null;
         AI lastOpponent = null;
-        GameEngine lastGameEngine = null;
+        State lastGEInitialState = null;
 
         GameResult gameResult = new GameResult();
         for (Future<MatchResult> future : futures) {
             MatchResult matchResult = future.get();
             AI player = matchResult.getPlayer();
             AI opponent = matchResult.getOpponent();
-            GameEngine gameEngine = matchResult.getGameEngine();
+            State gameEngine = matchResult.getGameEngineInitialState();
 
             Preconditions.checkArgument(
                     lastPlayer == null || lastPlayer.equals(player),
@@ -88,14 +89,14 @@ public class Game implements Callable<Game.GameResult> {
                     lastOpponent, opponent);
 
             Preconditions.checkArgument(
-                    lastGameEngine == null || lastGameEngine.equals(gameEngine),
-                    "Illegal usage, game engines should always be the same, " +
-                            "but found lastGameEngine=%s, gameEngine=%s",
-                    lastGameEngine, gameEngine);
+                    lastGEInitialState == null || lastGEInitialState.equals(gameEngine),
+                    "Illegal usage, game engines' initial states should always be the same, " +
+                            "but found lastGEInitialState=%s, gameEngine=%s",
+                    lastGEInitialState, gameEngine);
 
             lastPlayer = player;
             lastOpponent = opponent;
-            lastGameEngine = gameEngine;
+            lastGEInitialState = gameEngine;
 
             gameResult.addMatchResult(matchResult);
         }

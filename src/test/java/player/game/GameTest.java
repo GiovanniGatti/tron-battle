@@ -10,17 +10,22 @@ import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.google.common.base.MoreObjects;
+
 import player.MockedAI;
 import player.Player.AI;
 import player.Player.Action;
 import player.engine.GameEngine;
 import player.engine.MockedGE;
+import player.engine.State;
 import player.engine.Winner;
 import player.game.Game.GameResult;
 
@@ -99,8 +104,8 @@ class GameTest implements WithAssertions {
     @Test
     @DisplayName("requires that all supplied game engines are the same")
     void throwIllegalArgumentExceptionIfOneOfSuppliedGameEnginesIsDifferentFromTheOthers() {
-        GameEngine match1 = MockedGE.anyWithPlayerScore(15);
-        GameEngine match2 = new AnotherGE();
+        GameEngine match1 = MockedGE.anyWithInitialState(new InitialState(0));
+        GameEngine match2 = MockedGE.anyWithInitialState(new InitialState(1));
 
         List<GameEngine> matches = Arrays.asList(match1, match2);
         Iterator<GameEngine> it = matches.iterator();
@@ -109,12 +114,12 @@ class GameTest implements WithAssertions {
 
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(game::call)
-                .withMessageContaining("Illegal usage, game engines should always be the same");
+                .withMessageContaining("Illegal usage, game engines' initial states should always be the same");
     }
 
     @Nested
     @DisplayName("that finished, returns a result with")
-    class Statisticts {
+    class Statistics {
 
         @Test
         @DisplayName("the right average player score")
@@ -239,57 +244,37 @@ class GameTest implements WithAssertions {
         }
     }
 
-    private static class AnotherGE implements GameEngine {
+    private static class InitialState implements State {
+        private final int id;
 
-        @Override
-        public void start() {
-
+        InitialState(int id) {
+            this.id = id;
         }
 
         @Override
-        public void run(AI player, AI opponent) {
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
 
-        }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
-        @Override
-        public Winner getWinner() {
-            return null;
-        }
-
-        @Override
-        public int playerInput() {
-            return 0;
-        }
-
-        @Override
-        public int opponentInput() {
-            return 0;
-        }
-
-        @Override
-        public int getPlayerScore() {
-            return 0;
-        }
-
-        @Override
-        public int getOpponentScore() {
-            return 0;
-        }
-
-        @Override
-        public int getNumberOfRounds() {
-            return 0;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return this == o || !(o == null || getClass() != o.getClass());
-
+            InitialState that = (InitialState) o;
+            return id == that.id;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(getClass());
+            return Objects.hash(id);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                    .add("id", id)
+                    .toString();
         }
     }
 }

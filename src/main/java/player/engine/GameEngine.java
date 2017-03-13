@@ -5,12 +5,6 @@ import static player.Player.AI;
 public interface GameEngine {
 
     /**
-     * Computes the very first state, which usually is a match set up (build maps, boards, place players into their
-     * start position...)
-     */
-    void start();
-
-    /**
      * Computes the new match state based on the players' actions
      */
     void run(AI player, AI opponent);
@@ -46,4 +40,10 @@ public interface GameEngine {
      * Returns the number of executed rounds
      */
     int getNumberOfRounds();
+
+    /**
+     *
+     * @return the an immutable representation of the game engine's inital state
+     */
+    State getInitialState();
 }

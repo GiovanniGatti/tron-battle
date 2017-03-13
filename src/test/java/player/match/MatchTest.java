@@ -15,27 +15,9 @@ import player.engine.GameEngine;
 import player.engine.MockedGE;
 import player.engine.MultipleRoundMockedGE;
 import player.engine.Winner;
-import player.match.Match.MatchResult;
 
 @DisplayName("A match")
 class MatchTest implements WithAssertions {
-
-    @Test
-    @DisplayName("starts up only once the provided game engine")
-    void startUpGameEngine() {
-        MockedGE.Builder start = MockedGE.newBuilder().withWinner(Winner.ON_GOING);
-        MockedGE.Builder round1 = MockedGE.newBuilder().withWinner(Winner.PLAYER);
-
-        MultipleRoundMockedGE gameEngine = new MultipleRoundMockedGE(start, round1);
-
-        Supplier<GameEngine> gameEngineSupplier = () -> gameEngine;
-
-        Match match = new Match(anyAIInput(), anyAIInput(), gameEngineSupplier);
-
-        match.call();
-
-        assertThat(gameEngine.getStartCount()).isEqualTo(1);
-    }
 
     @Test
     @DisplayName("is played until someone wins")

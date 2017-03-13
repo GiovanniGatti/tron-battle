@@ -21,7 +21,7 @@ import player.engine.GameEngine;
 import player.engine.Winner;
 import player.game.Game;
 import player.game.Game.GameResult;
-import player.match.Match;
+import player.match.MatchResult;
 
 /**
  * Play any number of AIs against each other and then check its performances
@@ -103,7 +103,7 @@ public final class Contest implements Callable<Contest.ContestResult> {
                     AI player = result
                             .getMatchResults()
                             .stream()
-                            .map(Match.MatchResult::getPlayer)
+                            .map(MatchResult::getPlayer)
                             .findAny()
                             .orElseThrow(
                                     () -> new IllegalStateException("Expected at least one player, but none found"));
@@ -121,7 +121,7 @@ public final class Contest implements Callable<Contest.ContestResult> {
                     AI opponent = result
                             .getMatchResults()
                             .stream()
-                            .map(Match.MatchResult::getOpponent)
+                            .map(MatchResult::getOpponent)
                             .findAny()
                             .orElseThrow(
                                     () -> new IllegalStateException("Expected at least one opponent, but none found"));

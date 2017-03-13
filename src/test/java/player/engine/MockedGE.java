@@ -60,6 +60,12 @@ public final class MockedGE {
                 .build();
     }
 
+    public static GameEngine anyWithInitialState(State initialState) {
+        return newBuilder()
+                .withInitialState(initialState)
+                .build();
+    }
+
     public static final class Builder {
 
         private Random random;
@@ -70,6 +76,7 @@ public final class MockedGE {
 
         private List<Integer> playerInput;
         private List<Integer> opponentInput;
+        private State initialState;
 
         private Builder() {
             this.random = new Random();
@@ -129,8 +136,20 @@ public final class MockedGE {
             return this;
         }
 
+        public Builder withInitialState(State initialState) {
+            this.initialState = initialState;
+            return this;
+        }
+
         public GameEngine build() {
-            return new MockedGameEngine(winner, playerScore, opponentScore, numberOfRounds, playerInput, opponentInput);
+            return new MockedGameEngine(
+                    winner,
+                    playerScore,
+                    opponentScore,
+                    numberOfRounds,
+                    playerInput,
+                    opponentInput,
+                    initialState);
         }
     }
 
@@ -147,13 +166,16 @@ public final class MockedGE {
         private final Iterator<Integer> playerInputIt;
         private final Iterator<Integer> opponentInputIt;
 
+        private final State initialState;
+
         private MockedGameEngine(
                 Winner winner,
                 int playerScore,
                 int opponentScore,
                 int numberOfRounds,
                 List<Integer> playerInput,
-                List<Integer> opponentInput) {
+                List<Integer> opponentInput,
+                State initialState) {
 
             this.winner = winner;
             this.playerScore = playerScore;
@@ -164,11 +186,7 @@ public final class MockedGE {
 
             this.playerInputIt = playerInput.iterator();
             this.opponentInputIt = opponentInput.iterator();
-        }
-
-        @Override
-        public void start() {
-            // ILB
+            this.initialState = initialState;
         }
 
         @Override
@@ -207,6 +225,11 @@ public final class MockedGE {
         }
 
         @Override
+        public State getInitialState() {
+            return initialState;
+        }
+
+        @Override
         public boolean equals(Object o) {
             return this == o || !(o == null || getClass() != o.getClass());
         }
@@ -227,6 +250,7 @@ public final class MockedGE {
                     .add("opponentInput", opponentInput)
                     .add("playerInputIt", playerInputIt)
                     .add("opponentInputIt", opponentInputIt)
+                    .add("initialState", initialState)
                     .toString();
         }
     }

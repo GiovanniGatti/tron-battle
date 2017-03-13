@@ -5,14 +5,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+import javax.annotation.Nullable;
+
 import player.Player.AI;
 import player.engine.MockedGE.Builder;
 
 public class MultipleRoundMockedGE implements GameEngine {
 
     private final Iterator<GameEngine> rounds;
+    private final State initialState;
     private GameEngine currentState;
-    private int startCount;
     private int runCount;
 
     public MultipleRoundMockedGE(Builder startState, Builder... rounds) {
@@ -24,13 +26,8 @@ public class MultipleRoundMockedGE implements GameEngine {
 
         this.rounds = r.iterator();
         this.currentState = startState.build();
-        this.startCount = 0;
+        this.initialState = currentState.getInitialState();
         this.runCount = 0;
-    }
-
-    @Override
-    public void start() {
-        startCount++;
     }
 
     @Override
@@ -69,8 +66,9 @@ public class MultipleRoundMockedGE implements GameEngine {
         return currentState.getNumberOfRounds();
     }
 
-    public int getStartCount() {
-        return startCount;
+    @Override
+    public State getInitialState() {
+        return initialState;
     }
 
     public int getRunCount() {
@@ -78,7 +76,7 @@ public class MultipleRoundMockedGE implements GameEngine {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return this == o || !(o == null || getClass() != o.getClass());
     }
 

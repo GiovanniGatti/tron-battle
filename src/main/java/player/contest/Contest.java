@@ -21,7 +21,6 @@ import player.engine.GameEngine;
 import player.engine.Winner;
 import player.game.Game;
 import player.game.Game.GameResult;
-import player.match.MatchResult;
 
 /**
  * Play any number of AIs against each other and then check its performances
@@ -63,7 +62,7 @@ public final class Contest implements Callable<Contest.ContestResult> {
     public ContestResult call() throws InterruptedException, ExecutionException {
 
         if (ais.size() < 2) {
-            throw new IllegalStateException("Unable to play a contest with a single provided AI");
+            throw new IllegalStateException("Unable to play a contest with a single AI");
         }
 
         List<Callable<GameResult>> games = new ArrayList<>();
@@ -100,13 +99,7 @@ public final class Contest implements Callable<Contest.ContestResult> {
                     Future<GameResult> future = futures.get(offset + k);
                     GameResult result = future.get();
 
-                    AI player = result
-                            .getMatchResults()
-                            .stream()
-                            .map(MatchResult::getPlayer)
-                            .findAny()
-                            .orElseThrow(
-                                    () -> new IllegalStateException("Expected at least one player, but none found"));
+                    AI player = result.getPlayer();
 
                     if (scores[i] == null) {
                         scores[i] = new Score(player);
@@ -118,13 +111,7 @@ public final class Contest implements Callable<Contest.ContestResult> {
                     playerScore.updateAverageScoreMean(result.getAveragePlayerScore());
                     playerScore.updateAverageWinRateMean(result.getPlayerWinRate());
 
-                    AI opponent = result
-                            .getMatchResults()
-                            .stream()
-                            .map(MatchResult::getOpponent)
-                            .findAny()
-                            .orElseThrow(
-                                    () -> new IllegalStateException("Expected at least one opponent, but none found"));
+                    AI opponent = result.getOpponent();
 
                     if (scores[j] == null) {
                         scores[j] = new Score(opponent);
@@ -169,7 +156,7 @@ public final class Contest implements Callable<Contest.ContestResult> {
             }
 
             this.classification = Arrays.asList(scores);
-            Collections.sort(classification, SCORE_COMPARATOR);
+            this.classification.sort(SCORE_COMPARATOR);
         }
 
         List<Score> getClassification() {
@@ -262,8 +249,8 @@ public final class Contest implements Callable<Contest.ContestResult> {
                     .add("ai", ai)
                     .add("victoryCount", victoryCount)
                     .add("averageScore", averageScore)
-                    .add("averageNumberOfRounds", averageNumberOfRounds)
                     .add("averageWinRate", averageWinRate)
+                    .add("averageNumberOfRounds", averageNumberOfRounds)
                     .toString();
         }
     }

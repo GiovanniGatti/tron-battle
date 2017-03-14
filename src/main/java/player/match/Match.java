@@ -16,22 +16,26 @@ import player.engine.Winner;
  */
 public final class Match implements Callable<MatchResult> {
 
-    private final AI player;
-    private final AI opponent;
-    private final GameEngine gameEngine;
+    private final Function<IntSupplier, Supplier<AI>> playerSupplier;
+    private final Function<IntSupplier, Supplier<AI>> opponentSupplier;
+    private final Supplier<GameEngine> gameEngineSupplier;
 
     public Match(
             Function<IntSupplier, Supplier<AI>> player,
             Function<IntSupplier, Supplier<AI>> opponent,
             Supplier<GameEngine> gameEngine) {
 
-        this.gameEngine = gameEngine.get();
-        this.player = player.apply(this.gameEngine::playerInput).get();
-        this.opponent = opponent.apply(this.gameEngine::opponentInput).get();
+        this.playerSupplier = player;
+        this.opponentSupplier = opponent;
+        this.gameEngineSupplier = gameEngine;
     }
 
     @Override
     public MatchResult call() {
+
+        GameEngine gameEngine = gameEngineSupplier.get();
+        AI player = playerSupplier.apply(gameEngine::playerInput).get();
+        AI opponent = opponentSupplier.apply(gameEngine::opponentInput).get();
 
         do {
             gameEngine.run(player, opponent);

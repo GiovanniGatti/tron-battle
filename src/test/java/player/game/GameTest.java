@@ -1,6 +1,7 @@
 package player.game;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -40,14 +41,18 @@ class GameTest implements WithAssertions {
     }
 
     @Test
-    @DisplayName("is a run of multiple matches")
-    void playMatches() throws Exception {
+    @DisplayName("fails with a good error message when playing no matches at all")
+    void failsWhenNoEvenASingleMatchIsPlayed() {
+        GameEngine match1 = MockedGE.any();
 
-        Game game = new Game(anyAIInput(), anyAIInput(), MockedGE::any, service, 4);
+        List<GameEngine> matches = Collections.singletonList(match1);
+        Iterator<GameEngine> it = matches.iterator();
 
-        GameResult result = game.call();
+        Game game = new Game(anyAIInput(), anyAIInput(), it::next, service, 0);
 
-        assertThat(result.getMatchResults()).hasSize(4);
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(game::call)
+                .withMessage("At least one match should be player, numberOfMatches=0");
     }
 
     @Test
@@ -212,14 +217,13 @@ class GameTest implements WithAssertions {
 
             GameResult result = game.call();
 
-            assertThat(result.toString()).contains(
-                    "GameResult{averagePlayerScore=5.0, " +
-                            "averageOpponentScore=3.0, " +
-                            "averageNumberOfRounds=7.0, " +
-                            "playerWinRate=1.0, " +
-                            "numberOfMatches=1, " +
-                            "winner=PLAYER, " +
-                            "matchResults=[");
+            assertThat(result.toString())
+                    .contains("averagePlayerScore=5.0,")
+                    .contains("averageOpponentScore=3.0,")
+                    .contains("averageNumberOfRounds=7.0,")
+                    .contains("playerWinRate=1.0,")
+                    .contains("numberOfMatches=1,")
+                    .contains("winner=PLAYER,");
 
         }
     }

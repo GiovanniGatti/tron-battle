@@ -1,5 +1,7 @@
 package player.match;
 
+import com.google.common.base.MoreObjects;
+
 import player.Player.AI;
 import player.engine.State;
 import player.engine.Winner;
@@ -63,14 +65,14 @@ public final class MatchResult {
 
     @Override
     public String toString() {
-        return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("player", player)
-                .add("opponent", opponent)
-                .add("gameEngineInitialState", gameEngineInitialState)
-                .add("playerScore", playerScore)
-                .add("opponentScore", opponentScore)
-                .add("rounds", rounds)
-                .add("winner", winner)
+        return MoreObjects.toStringHelper(this)
+                .add("winner", getWinner())
+                .add("playerScore", getPlayerScore())
+                .add("opponentScore", getPlayerScore())
+                .add("rounds", getRounds())
+                .add("player", getPlayer())
+                .add("opponent", getOpponent())
+                .add("gameEngineInitialState", getGameEngineInitialState())
                 .toString();
     }
 }

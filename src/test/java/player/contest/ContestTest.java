@@ -103,7 +103,7 @@ class ContestTest implements WithAssertions {
 
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(contest::call)
-                .withMessageContaining("Unable to play a contest with a single provided AI");
+                .withMessageContaining("Unable to play a contest with a single AI");
     }
 
     @Nested

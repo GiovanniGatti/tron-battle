@@ -1,4 +1,4 @@
-package player.contest;
+package player.engine;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,11 +22,8 @@ import com.google.common.collect.ImmutableMap;
 
 import player.MockedAI;
 import player.Player.AI;
-import player.contest.Contest.ContestResult;
-import player.contest.Contest.Score;
-import player.engine.GameEngine;
-import player.engine.MockedGE;
-import player.engine.Winner;
+import player.engine.Contest.ContestResult;
+import player.engine.Contest.Score;
 
 @DisplayName("A contest")
 class ContestTest implements WithAssertions {

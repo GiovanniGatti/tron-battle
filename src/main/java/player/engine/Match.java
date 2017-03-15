@@ -1,4 +1,4 @@
-package player.match;
+package player.engine;
 
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -6,8 +6,6 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import player.Player.AI;
-import player.engine.GameEngine;
-import player.engine.Winner;
 
 /**
  *

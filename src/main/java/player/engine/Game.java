@@ -1,4 +1,4 @@
-package player.game;
+package player.engine;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,11 +17,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 import player.Player.AI;
-import player.engine.GameEngine;
-import player.engine.State;
-import player.engine.Winner;
-import player.match.Match;
-import player.match.MatchResult;
 
 /**
  * Plays multiple matches between to AIs. It is useful when IAs or State supplier are not deterministic,
@@ -119,6 +114,7 @@ public class Game implements Callable<Game.GameResult> {
 
     public static final class GameResult {
 
+        //FIXME: break AI dependency
         private final AI player;
         private final AI opponent;
         private final State initialState;

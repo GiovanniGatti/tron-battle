@@ -1,4 +1,4 @@
-package player.game;
+package player.engine;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,11 +24,12 @@ import com.google.common.base.MoreObjects;
 import player.MockedAI;
 import player.Player.AI;
 import player.Player.Action;
+import player.engine.Game;
 import player.engine.GameEngine;
 import player.engine.MockedGE;
 import player.engine.State;
 import player.engine.Winner;
-import player.game.Game.GameResult;
+import player.engine.Game.GameResult;
 
 @DisplayName("A game")
 class GameTest implements WithAssertions {

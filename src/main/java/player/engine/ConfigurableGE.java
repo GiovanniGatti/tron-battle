@@ -9,7 +9,8 @@ import java.util.Queue;
 
 import com.google.common.collect.ImmutableMap;
 
-abstract class ConfigurableGE implements GameEngine {
+//FIXME: get rid of this class
+public abstract class ConfigurableGE implements GameEngine {
 
     private Winner winner;
     private int rounds;
@@ -18,7 +19,7 @@ abstract class ConfigurableGE implements GameEngine {
     private final Queue<Integer> playerInput;
     private final Queue<Integer> opponentInput;
 
-    ConfigurableGE(Map<String, Object> conf) {
+    protected ConfigurableGE(Map<String, Object> conf) {
         this.rounds = 0;
         this.winner = Winner.ON_GOING;
         this.conf = ImmutableMap.copyOf(conf);
@@ -32,13 +33,13 @@ abstract class ConfigurableGE implements GameEngine {
 
     protected abstract Winner runRound(AI player, AI opponent);
 
-    void toPlayerInput(int... values) {
+    protected void toPlayerInput(int... values) {
         for (int value : values) {
             playerInput.add(value);
         }
     }
 
-    void toOpponentInput(int... values) {
+    protected void toOpponentInput(int... values) {
         for (int value : values) {
             opponentInput.add(value);
         }

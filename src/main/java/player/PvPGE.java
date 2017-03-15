@@ -1,4 +1,4 @@
-package player.engine;
+package player;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -13,7 +13,9 @@ import player.Player.AI;
 import player.Player.Action;
 import player.Player.BattleField;
 import player.Player.Spot;
-import player.TronGameEngine;
+import player.engine.ConfigurableGE;
+import player.engine.State;
+import player.engine.Winner;
 
 public final class PvPGE extends ConfigurableGE {
 

@@ -1,4 +1,4 @@
-package player.contest;
+package player.engine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,10 +17,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 import player.Player.AI;
-import player.engine.GameEngine;
-import player.engine.Winner;
-import player.game.Game;
-import player.game.Game.GameResult;
+import player.engine.Game.GameResult;
 
 /**
  * Play any number of AIs against each other and then check its performances
@@ -159,7 +156,7 @@ public final class Contest implements Callable<Contest.ContestResult> {
             this.classification.sort(SCORE_COMPARATOR);
         }
 
-        List<Score> getClassification() {
+        public List<Score> getClassification() {
             return Collections.unmodifiableList(classification);
         }
 

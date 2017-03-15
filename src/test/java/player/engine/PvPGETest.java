@@ -24,6 +24,7 @@ import player.Player.AI;
 import player.Player.Action;
 import player.Player.ActionsType;
 import player.Player.Spot;
+import player.PvPGE;
 
 @DisplayName("A PvP Game Engine")
 class PvPGETest implements WithAssertions {

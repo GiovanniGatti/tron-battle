@@ -4,11 +4,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import player.Player.BattleField;
 import player.Player.LongestSequenceAI;
 import player.Player.Spot;
-import player.engine.PvPGE;
-import player.game.Game;
+import player.engine.Game;
 
 public final class GameRunner {
 

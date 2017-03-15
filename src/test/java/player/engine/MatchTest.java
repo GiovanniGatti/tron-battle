@@ -1,4 +1,4 @@
-package player.match;
+package player.engine;
 
 import java.util.function.Function;
 import java.util.function.IntSupplier;
@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import player.MockedAI;
 import player.Player;
 import player.engine.GameEngine;
+import player.engine.Match;
+import player.engine.MatchResult;
 import player.engine.MockedGE;
 import player.engine.MultipleRoundMockedGE;
 import player.engine.Winner;

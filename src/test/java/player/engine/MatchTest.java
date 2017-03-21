@@ -9,15 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import player.MockedAI;
-import player.Player;
-import player.engine.GameEngine;
-import player.engine.Match;
-import player.engine.MatchResult;
-import player.engine.MockedGE;
-import player.engine.MultipleRoundMockedGE;
-import player.engine.Winner;
-
 @DisplayName("A match")
 class MatchTest implements WithAssertions {
 
@@ -93,7 +84,11 @@ class MatchTest implements WithAssertions {
         }
     }
 
-    private static Function<IntSupplier, Supplier<Player.AI>> anyAIInput() {
-        return (input) -> MockedAI::any;
+    private static Function<IntSupplier, Supplier<AI>> anyAIInput() {
+        return (input) -> AnyAI::new;
+    }
+
+    private static class AnyAI implements AI {
+
     }
 }

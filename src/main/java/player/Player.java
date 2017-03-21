@@ -753,23 +753,10 @@ public final class Player {
 
     public static abstract class AI {
 
-        private final Map<String, Object> conf;
         private final RepositoryUpdater updater;
 
-        /**
-         * Builds an AI with specified configuration.<br>
-         * It is recommended to create a default configuration.
-         */
-        public AI(Map<String, Object> conf, RepositoryUpdater updater) {
-            this.conf = Collections.unmodifiableMap(conf);
-            this.updater = updater;
-        }
-
-        /**
-         * Builds an AI with an empty configuration.
-         */
         public AI(RepositoryUpdater updater) {
-            this(Collections.emptyMap(), updater);
+            this.updater = updater;
         }
 
         /**
@@ -783,26 +770,14 @@ public final class Player {
             updater.update();
         }
 
-        public Map<String, Object> getConf() {
-            return conf;
-        }
-
         @Override
         public final boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            AI ai = (AI) o;
-            return Objects.equals(conf, ai.conf);
+            return this == o || !(o == null || getClass() != o.getClass());
         }
 
         @Override
         public final int hashCode() {
-            return Objects.hash(conf, getClass());
+            return Objects.hash(getClass());
         }
     }
 

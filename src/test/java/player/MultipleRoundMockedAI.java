@@ -1,35 +1,28 @@
 package player;
 
-import static player.Player.AI;
 import static player.Player.Action;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
+import java.util.stream.Collectors;
 
-import player.MockedAI.Builder;
+import player.engine.AI;
 
-public class MultipleRoundMockedAI extends AI {
+public class MultipleRoundMockedAI extends Player.AI implements AI {
 
-    private final Iterator<AI> rounds;
+    private final Iterator<Player.AI> rounds;
 
-    public MultipleRoundMockedAI(Builder... rounds) {
-        super(Collections.emptyMap(), MultipleRoundMockedAI::noOp);
+    public MultipleRoundMockedAI(MockedAI.Builder... rounds) {
+        super(() -> {});
 
-        List<AI> r = new ArrayList<>();
-        for (Builder round : rounds) {
-            r.add(round.build());
-        }
-        this.rounds = r.iterator();
+        this.rounds = Arrays.stream(rounds)
+                .map(MockedAI.Builder::build)
+                .collect(Collectors.toList())
+                .iterator();
     }
 
     @Override
     public Action[] play() {
         return rounds.next().play();
-    }
-
-    private static void noOp() {
-        // ILB
     }
 }

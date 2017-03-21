@@ -7,7 +7,7 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-import player.Player.AI;
+//FIXME: get rid of dependency
 import player.engine.MockedGE.Builder;
 
 public class MultipleRoundMockedGE implements GameEngine {

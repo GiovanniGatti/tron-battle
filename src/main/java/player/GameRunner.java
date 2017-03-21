@@ -22,8 +22,8 @@ public final class GameRunner {
         Spot opponentStartSpot = new Spot(0, 0);
 
         Game game = new Game(
-                playerInput -> () -> new SnailAI(new KnowledgeRepo(playerInput)),
-                opponentInput -> () -> new LongestSequenceAI(new Player.InputRepository(opponentInput)),
+                playerInput -> () -> new AIMapper(new SnailAI(new KnowledgeRepo(playerInput))),
+                opponentInput -> () -> new AIMapper(new LongestSequenceAI(new Player.InputRepository(opponentInput))),
                 () -> PvPGE.withFreshBattleField(false, playerStartSpot, opponentStartSpot),
                 pool);
 

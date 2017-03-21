@@ -1,13 +1,11 @@
 package player.engine;
 
-import static player.Player.AI;
-
-public interface GameEngine {
+public interface GameEngine<T extends AI> {
 
     /**
      * Computes the new match state based on the players' actions
      */
-    void run(AI player, AI opponent);
+    void run(T player, T opponent);
 
     /**
      * 

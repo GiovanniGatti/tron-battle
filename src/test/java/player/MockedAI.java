@@ -1,13 +1,9 @@
 package player;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.mockito.Mockito;
 
 import com.google.common.base.MoreObjects;
 
-import player.Player.AI;
 import player.Player.Action;
 
 public final class MockedAI {
@@ -16,20 +12,14 @@ public final class MockedAI {
         // Utility class
     }
 
-    public static AI any() {
-        return newBuilder().build();
+    public static AIMapper any() {
+        return new AIMapper(newBuilder().build());
     }
 
-    public static AI anyWithActions(Action... actions) {
-        return newBuilder()
+    public static AIMapper anyWithActions(Action... actions) {
+        return new AIMapper(newBuilder()
                 .withActions(actions)
-                .build();
-    }
-
-    public static AI anyConf(Map<String, Object> conf) {
-        return newBuilder()
-                .withConf(conf)
-                .build();
+                .build());
     }
 
     public static Builder newBuilder() {
@@ -38,17 +28,10 @@ public final class MockedAI {
 
     public static class Builder {
 
-        private Map<String, Object> conf;
         private Action[] actions;
 
         private Builder() {
-            this.conf = Collections.emptyMap();
             this.actions = new Action[] { Mockito.mock(Action.class) };
-        }
-
-        public Builder withConf(Map<String, Object> conf) {
-            this.conf = conf;
-            return this;
         }
 
         public Builder withActions(Action... actions) {
@@ -56,17 +39,17 @@ public final class MockedAI {
             return this;
         }
 
-        AI build() {
-            return new MockedArtificialIntelligence(conf, actions);
+        Player.AI build() {
+            return new MockedArtificialIntelligence(actions);
         }
     }
 
-    private static class MockedArtificialIntelligence extends AI {
+    private static class MockedArtificialIntelligence extends Player.AI {
 
         private final Action[] actions;
 
-        private MockedArtificialIntelligence(Map<String, Object> conf, Action[] actions) {
-            super(conf, MockedArtificialIntelligence::noOp);
+        private MockedArtificialIntelligence(Action[] actions) {
+            super(() -> {});
             this.actions = actions;
         }
 
@@ -78,13 +61,8 @@ public final class MockedAI {
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                    .add("conf", getConf())
                     .add("actions", actions)
                     .toString();
-        }
-
-        private static void noOp() {
-            // ILB
         }
     }
 }

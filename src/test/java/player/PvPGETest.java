@@ -1,4 +1,4 @@
-package player.engine;
+package player;
 
 import static player.MockedAI.newBuilder;
 import static player.Player.ActionsType.DOWN;
@@ -17,14 +17,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import player.MockedAI;
 import player.MockedAI.Builder;
-import player.MultipleRoundMockedAI;
-import player.Player.AI;
 import player.Player.Action;
 import player.Player.ActionsType;
 import player.Player.Spot;
-import player.PvPGE;
 
 @DisplayName("A PvP Game Engine")
 class PvPGETest implements WithAssertions {
@@ -35,8 +31,8 @@ class PvPGETest implements WithAssertions {
 
         PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(29, 10), new Spot(0, 10));
 
-        AI player = MockedAI.anyWithActions(new Action(RIGHT));
-        AI opponent = MockedAI.anyWithActions(new Action(LEFT));
+        AIMapper player = MockedAI.anyWithActions(new Action(RIGHT));
+        AIMapper opponent = MockedAI.anyWithActions(new Action(LEFT));
 
         ge.run(player, opponent);
 
@@ -49,8 +45,8 @@ class PvPGETest implements WithAssertions {
 
         PvPGE ge = PvPGE.withFreshBattleField(false, new Spot(29, 10), new Spot(0, 10));
 
-        AI player = MockedAI.anyWithActions(new Action(RIGHT));
-        AI opponent = MockedAI.anyWithActions(new Action(LEFT));
+        AIMapper player = MockedAI.anyWithActions(new Action(RIGHT));
+        AIMapper opponent = MockedAI.anyWithActions(new Action(LEFT));
 
         ge.run(player, opponent);
 
@@ -63,8 +59,8 @@ class PvPGETest implements WithAssertions {
 
         PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(0, 10));
 
-        AI player = MockedAI.anyWithActions(new Action(RIGHT));
-        AI opponent = MockedAI.anyWithActions(new Action(LEFT));
+        AIMapper player = MockedAI.anyWithActions(new Action(RIGHT));
+        AIMapper opponent = MockedAI.anyWithActions(new Action(LEFT));
 
         ge.run(player, opponent);
 
@@ -101,8 +97,8 @@ class PvPGETest implements WithAssertions {
 
         PvPGE ge = PvPGE.withFreshBattleField(false, new Spot(15, 10), new Spot(0, 10));
 
-        AI player = MockedAI.anyWithActions(new Action(RIGHT));
-        AI opponent = MockedAI.anyWithActions(new Action(RIGHT));
+        AIMapper player = MockedAI.anyWithActions(new Action(RIGHT));
+        AIMapper opponent = MockedAI.anyWithActions(new Action(RIGHT));
 
         ge.run(player, opponent);
 
@@ -147,8 +143,8 @@ class PvPGETest implements WithAssertions {
 
                 PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(29, 10), new Spot(15, 10));
 
-                AI player = MockedAI.anyWithActions(new Action(RIGHT));
-                AI opponent = MockedAI.anyWithActions(new Action(RIGHT));
+                AIMapper player = MockedAI.anyWithActions(new Action(RIGHT));
+                AIMapper opponent = MockedAI.anyWithActions(new Action(RIGHT));
 
                 ge.run(player, opponent);
 
@@ -163,11 +159,11 @@ class PvPGETest implements WithAssertions {
 
                 Builder playerRound1 = newBuilder().withActions(new Action(RIGHT));
                 Builder playerRound2 = newBuilder().withActions(new Action(LEFT));
-                MultipleRoundMockedAI player = new MultipleRoundMockedAI(playerRound1, playerRound2);
+                AIMapper player = new AIMapper(new MultipleRoundMockedAI(playerRound1, playerRound2));
 
                 Builder opponentRound1 = newBuilder().withActions(new Action(RIGHT));
                 Builder opponentRound2 = newBuilder().withActions(new Action(RIGHT));
-                MultipleRoundMockedAI opponent = new MultipleRoundMockedAI(opponentRound1, opponentRound2);
+                AIMapper opponent = new AIMapper(new MultipleRoundMockedAI(opponentRound1, opponentRound2));
 
                 ge.run(player, opponent);
                 assertThat(ge.getWinner()).isEqualTo(ON_GOING);
@@ -182,8 +178,8 @@ class PvPGETest implements WithAssertions {
 
                 PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 11), new Spot(15, 10));
 
-                AI player = MockedAI.anyWithActions(new Action(UP));
-                AI opponent = MockedAI.anyWithActions(new Action(LEFT));
+                AIMapper player = MockedAI.anyWithActions(new Action(UP));
+                AIMapper opponent = MockedAI.anyWithActions(new Action(LEFT));
 
                 ge.run(player, opponent);
 
@@ -201,8 +197,8 @@ class PvPGETest implements WithAssertions {
 
                 PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(29, 10));
 
-                AI player = MockedAI.anyWithActions(new Action(RIGHT));
-                AI opponent = MockedAI.anyWithActions(new Action(RIGHT));
+                AIMapper player = MockedAI.anyWithActions(new Action(RIGHT));
+                AIMapper opponent = MockedAI.anyWithActions(new Action(RIGHT));
 
                 ge.run(player, opponent);
 
@@ -217,11 +213,11 @@ class PvPGETest implements WithAssertions {
 
                 Builder playerRound1 = newBuilder().withActions(new Action(RIGHT));
                 Builder playerRound2 = newBuilder().withActions(new Action(RIGHT));
-                MultipleRoundMockedAI player = new MultipleRoundMockedAI(playerRound1, playerRound2);
+                AIMapper player = new AIMapper(new MultipleRoundMockedAI(playerRound1, playerRound2));
 
                 Builder opponentRound1 = newBuilder().withActions(new Action(RIGHT));
                 Builder opponentRound2 = newBuilder().withActions(new Action(LEFT));
-                MultipleRoundMockedAI opponent = new MultipleRoundMockedAI(opponentRound1, opponentRound2);
+                AIMapper opponent = new AIMapper(new MultipleRoundMockedAI(opponentRound1, opponentRound2));
 
                 ge.run(player, opponent);
                 assertThat(ge.getWinner()).isEqualTo(ON_GOING);
@@ -236,8 +232,8 @@ class PvPGETest implements WithAssertions {
 
                 PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(15, 10), new Spot(15, 11));
 
-                AI player = MockedAI.anyWithActions(new Action(LEFT));
-                AI opponent = MockedAI.anyWithActions(new Action(UP));
+                AIMapper player = MockedAI.anyWithActions(new Action(LEFT));
+                AIMapper opponent = MockedAI.anyWithActions(new Action(UP));
 
                 ge.run(player, opponent);
 
@@ -265,8 +261,7 @@ class PvPGETest implements WithAssertions {
             builders.add(newBuilder().withActions(action));
         }
 
-        MultipleRoundMockedAI player =
-                new MultipleRoundMockedAI(builders.toArray(new Builder[builders.size()]));
+        AIMapper player = new AIMapper(new MultipleRoundMockedAI(builders.toArray(new Builder[builders.size()])));
 
         Action[] opponentActions =
                 actionsOf(UP, UP, LEFT, LEFT, LEFT, LEFT, LEFT, LEFT, LEFT, LEFT, LEFT, LEFT, LEFT, LEFT, LEFT, LEFT,
@@ -283,8 +278,7 @@ class PvPGETest implements WithAssertions {
             builders2.add(newBuilder().withActions(action));
         }
 
-        MultipleRoundMockedAI opponent =
-                new MultipleRoundMockedAI(builders2.toArray(new Builder[builders2.size()]));
+        AIMapper opponent = new AIMapper(new MultipleRoundMockedAI(builders2.toArray(new Builder[builders2.size()])));
 
         PvPGE ge = PvPGE.withFreshBattleField(true, new Spot(9, 4), new Spot(29, 2));
 

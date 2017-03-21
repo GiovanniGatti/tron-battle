@@ -1,6 +1,5 @@
 package player;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -9,15 +8,14 @@ import javax.annotation.concurrent.Immutable;
 
 import com.google.common.base.Preconditions;
 
-import player.Player.AI;
 import player.Player.Action;
 import player.Player.BattleField;
 import player.Player.Spot;
-import player.engine.ConfigurableGE;
+import player.engine.AbstractGE;
 import player.engine.State;
 import player.engine.Winner;
 
-public final class PvPGE extends ConfigurableGE {
+public final class PvPGE extends AbstractGE<AIMapper> {
 
     private final State initialState;
 
@@ -45,8 +43,6 @@ public final class PvPGE extends ConfigurableGE {
             Spot playerStartSpot,
             Spot opponentStartSpot) {
 
-        super(Collections.emptyMap());
-
         Preconditions.checkArgument(battleField.hasLightCycleStartingAt(playerStartSpot),
                 "Player could not be found in grid at " + playerStartSpot);
         Preconditions.checkArgument(battleField.hasLightCycleStartingAt(opponentStartSpot),
@@ -65,9 +61,9 @@ public final class PvPGE extends ConfigurableGE {
     }
 
     @Override
-    protected Winner runRound(AI player, AI opponent) {
+    protected Winner runRound(AIMapper player, AIMapper opponent) {
         Spot firstStartSpot, secondStartSpot;
-        AI first, second;
+        AIMapper first, second;
         Consumer<Spot> firstInput, secondInput;
         Consumer<Integer> metadataFirstInput, metadataSecondInput;
 

@@ -8,8 +8,6 @@ import java.util.Random;
 
 import com.google.common.base.MoreObjects;
 
-import player.Player.AI;
-
 public final class MockedGE {
 
     private MockedGE() {

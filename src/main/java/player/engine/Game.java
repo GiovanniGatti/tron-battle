@@ -16,8 +16,6 @@ import java.util.stream.IntStream;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
-import player.Player.AI;
-
 /**
  * Plays multiple matches between to AIs. It is useful when IAs or State supplier are not deterministic,
  * otherwise, a single match is enough
@@ -114,7 +112,7 @@ public class Game implements Callable<Game.GameResult> {
 
     public static final class GameResult {
 
-        //FIXME: break AI dependency
+        // FIXME: break AI dependency
         private final AI player;
         private final AI opponent;
         private final State initialState;

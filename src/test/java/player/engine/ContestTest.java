@@ -3,7 +3,7 @@ package player.engine;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -18,10 +18,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.MoreObjects;
 
-import player.MockedAI;
-import player.Player.AI;
 import player.engine.Contest.ContestResult;
 import player.engine.Contest.Score;
 
@@ -41,13 +39,13 @@ class ContestTest implements WithAssertions {
     @DisplayName("returns the classification of a battle between multiple ais on multiple game engines")
     void returnsClassificationBetweenMultipleAIsOnMultipleGameEngines() throws Exception {
         Function<IntSupplier, Supplier<AI>> firstAI =
-                (t) -> () -> MockedAI.anyConf(ImmutableMap.of("id", "first"));
+                (t) -> () -> new AnyAI(1);
 
         Function<IntSupplier, Supplier<AI>> secondAI =
-                (t) -> () -> MockedAI.anyConf(ImmutableMap.of("id", "second"));
+                (t) -> () -> new AnyAI(2);
 
         Function<IntSupplier, Supplier<AI>> thirdAI =
-                (t) -> () -> MockedAI.anyConf(ImmutableMap.of("id", "third"));
+                (t) -> () -> new AnyAI(3);
 
         List<Function<IntSupplier, Supplier<AI>>> ais = Arrays.asList(firstAI, secondAI, thirdAI);
 
@@ -72,21 +70,20 @@ class ContestTest implements WithAssertions {
         Score second = classifications.get(1);
         Score third = classifications.get(2);
 
-        assertThat(first.getAi().getConf()).containsEntry("id", "first");
+        assertThat(first.getAi()).isEqualTo(new AnyAI(1));
         assertThat(first.getVictoryCount()).isEqualTo(4);
 
-        assertThat(second.getAi().getConf()).containsEntry("id", "second");
+        assertThat(second.getAi()).isEqualTo(new AnyAI(2));
         assertThat(second.getVictoryCount()).isEqualTo(3);
 
-        assertThat(third.getAi().getConf()).containsEntry("id", "third");
+        assertThat(third.getAi()).isEqualTo(new AnyAI(3));
         assertThat(third.getVictoryCount()).isEqualTo(2);
     }
 
     @Test
     @DisplayName("cannot run with a one single AI")
     void throwISEWhenSingleAIIsProvided() {
-        Function<IntSupplier, Supplier<AI>> singleAI =
-                (t) -> () -> MockedAI.anyConf(ImmutableMap.of("id", "first"));
+        Function<IntSupplier, Supplier<AI>> singleAI = (t) -> () -> new AnyAI(1);
 
         List<Function<IntSupplier, Supplier<AI>>> ais = Collections.singletonList(singleAI);
 
@@ -105,14 +102,14 @@ class ContestTest implements WithAssertions {
 
     @Nested
     @DisplayName("that finished, returns a result with")
-    class Statisticts {
+    class Statistics {
 
         @Test
         @DisplayName("the right average score")
         void averageScore() throws ExecutionException, InterruptedException {
             List<Function<IntSupplier, Supplier<AI>>> ais = Arrays.asList(
-                    (t) -> ContestTest::anyPlayerAI,
-                    (t) -> MockedAI::any);
+                    (t) -> () -> new AnyAI(1),
+                    (t) -> () -> new AnyAI(2));
 
             List<Supplier<GameEngine>> gameEngines = Arrays.asList(
                     () -> MockedGE.anyWithPlayerScore(10),
@@ -129,7 +126,7 @@ class ContestTest implements WithAssertions {
             Optional<Score> maybeScore =
                     result.getClassification()
                             .stream()
-                            .filter(t -> ContestTest.isPlayerAI(t.getAi()))
+                            .filter(t -> t.getAi().equals(new AnyAI(1)))
                             .findFirst();
 
             assertThat(maybeScore).isPresent();
@@ -143,8 +140,8 @@ class ContestTest implements WithAssertions {
         @DisplayName("the right average number of rounds")
         void averageNumberOfRounds() throws ExecutionException, InterruptedException {
             List<Function<IntSupplier, Supplier<AI>>> ais = Arrays.asList(
-                    (t) -> ContestTest::anyPlayerAI,
-                    (t) -> MockedAI::any);
+                    (t) -> () -> new AnyAI(1),
+                    (t) -> () -> new AnyAI(2));
 
             List<Supplier<GameEngine>> gameEngines = Arrays.asList(
                     () -> MockedGE.anyWithNumberOfRounds(10),
@@ -161,7 +158,7 @@ class ContestTest implements WithAssertions {
             Optional<Score> maybeScore =
                     result.getClassification()
                             .stream()
-                            .filter(t -> ContestTest.isPlayerAI(t.getAi()))
+                            .filter(t -> t.getAi().equals(new AnyAI(1)))
                             .findFirst();
 
             assertThat(maybeScore).isPresent();
@@ -175,8 +172,8 @@ class ContestTest implements WithAssertions {
         @DisplayName("the right average win rate")
         void averageWinRate() throws ExecutionException, InterruptedException {
             List<Function<IntSupplier, Supplier<AI>>> ais = Arrays.asList(
-                    (t) -> ContestTest::anyPlayerAI,
-                    (t) -> MockedAI::any);
+                    (t) -> () -> new AnyAI(1),
+                    (t) -> () -> new AnyAI(2));
 
             List<Supplier<GameEngine>> gameEngines = Arrays.asList(
                     () -> MockedGE.anyWithWinner(Winner.PLAYER),
@@ -194,7 +191,7 @@ class ContestTest implements WithAssertions {
             Optional<Score> maybeScore =
                     result.getClassification()
                             .stream()
-                            .filter(t -> ContestTest.isPlayerAI(t.getAi()))
+                            .filter(t -> t.getAi().equals(new AnyAI(1)))
                             .findFirst();
 
             assertThat(maybeScore).isPresent();
@@ -205,12 +202,38 @@ class ContestTest implements WithAssertions {
         }
     }
 
-    private static AI anyPlayerAI() {
-        return MockedAI.anyConf(ImmutableMap.of("id", "player"));
-    }
+    private static class AnyAI implements AI {
 
-    private static boolean isPlayerAI(AI ai) {
-        Map<String, Object> conf = ai.getConf();
-        return "player".equals(conf.get("id"));
+        private final int id;
+
+        public AnyAI(int id) {
+            this.id = id;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            AnyAI anyAI = (AnyAI) o;
+            return id == anyAI.id;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                    .add("id", id)
+                    .toString();
+        }
     }
 }

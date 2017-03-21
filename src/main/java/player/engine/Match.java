@@ -5,8 +5,6 @@ import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-import player.Player.AI;
-
 /**
  *
  * Represents a single match between any two IAs

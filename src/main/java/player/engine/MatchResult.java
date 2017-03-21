@@ -2,10 +2,6 @@ package player.engine;
 
 import com.google.common.base.MoreObjects;
 
-import player.Player.AI;
-import player.engine.State;
-import player.engine.Winner;
-
 public final class MatchResult {
 
     private final AI player;

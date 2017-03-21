@@ -21,14 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.base.MoreObjects;
 
-import player.MockedAI;
-import player.Player.AI;
-import player.Player.Action;
-import player.engine.Game;
-import player.engine.GameEngine;
-import player.engine.MockedGE;
-import player.engine.State;
-import player.engine.Winner;
 import player.engine.Game.GameResult;
 
 @DisplayName("A game")
@@ -78,7 +70,7 @@ class GameTest implements WithAssertions {
     @Test
     @DisplayName("requires that all supplied player AIs are the same")
     void throwIllegalArgumentExceptionIfOneOfSuppliedPlayerAIsIsDifferentFromTheOthers() {
-        AI playerRound1 = MockedAI.any();
+        AI playerRound1 = new AnyAI();
         AI playerRound2 = new AnotherAI();
 
         List<AI> player = Arrays.asList(playerRound1, playerRound2);
@@ -94,7 +86,7 @@ class GameTest implements WithAssertions {
     @Test
     @DisplayName("requires that all supplied opponent AIs are the same")
     void throwIllegalArgumentExceptionIfOneOfSuppliedOpponentAIsIsDifferentFromTheOthers() {
-        AI opponentRound1 = MockedAI.any();
+        AI opponentRound1 = new AnyAI();
         AI opponentRound2 = new AnotherAI();
 
         List<AI> opponent = Arrays.asList(opponentRound1, opponentRound2);
@@ -230,22 +222,34 @@ class GameTest implements WithAssertions {
     }
 
     private static Function<IntSupplier, Supplier<AI>> anyAIInput() {
-        return (input) -> MockedAI::any;
+        return (input) -> AnyAI::new;
     }
 
-    private static class AnotherAI extends AI {
+    private static class AnyAI implements AI {
 
-        public AnotherAI() {
-            super(AnotherAI::noOp);
+        @Override
+        public boolean equals(Object o) {
+            return this == o || !(o == null || getClass() != o.getClass());
+
         }
 
         @Override
-        public Action[] play() {
-            return new Action[0];
+        public int hashCode() {
+            return Objects.hash(getClass());
+        }
+    }
+
+    private static class AnotherAI implements AI {
+
+        @Override
+        public boolean equals(Object o) {
+            return this == o || !(o == null || getClass() != o.getClass());
+
         }
 
-        private static void noOp() {
-            // ILB
+        @Override
+        public int hashCode() {
+            return Objects.hash(getClass());
         }
     }
 

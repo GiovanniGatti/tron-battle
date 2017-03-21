@@ -1,11 +1,7 @@
-package player;
-
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import player.Player.LongestSequenceAI;
-import player.Player.Spot;
 import player.engine.Game;
 
 public final class GameRunner {
@@ -18,12 +14,14 @@ public final class GameRunner {
 
         ExecutorService pool = Executors.newFixedThreadPool(5);
 
-        Spot playerStartSpot = new Spot(15, 10);
-        Spot opponentStartSpot = new Spot(0, 0);
+        Player.Spot playerStartSpot = new Player.Spot(15, 10);
+        Player.Spot opponentStartSpot = new Player.Spot(0, 0);
 
         Game game = new Game(
-                playerInput -> () -> new AIMapper(new SnailAI(new KnowledgeRepo(playerInput))),
-                opponentInput -> () -> new AIMapper(new LongestSequenceAI(new Player.InputRepository(opponentInput))),
+                playerInput -> () -> new AIMapper(
+                        new SnailAI(new KnowledgeRepo(playerInput))),
+                opponentInput -> () -> new AIMapper(
+                        new Player.LongestSequenceAI(new Player.InputRepository(opponentInput))),
                 () -> PvPGE.withFreshBattleField(false, playerStartSpot, opponentStartSpot),
                 pool);
 

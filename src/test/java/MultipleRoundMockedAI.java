@@ -1,7 +1,3 @@
-package player;
-
-import static player.Player.Action;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
@@ -22,7 +18,7 @@ public class MultipleRoundMockedAI extends Player.AI implements AI {
     }
 
     @Override
-    public Action[] play() {
+    public Player.Action[] play() {
         return rounds.next().play();
     }
 }

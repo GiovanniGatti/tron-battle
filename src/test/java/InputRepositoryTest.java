@@ -1,5 +1,3 @@
-package player;
-
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.Random;
@@ -10,9 +8,6 @@ import org.assertj.core.util.Preconditions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import player.Player.InputRepository;
-import player.Player.Spot;
-
 @DisplayName("An input repository")
 class InputRepositoryTest implements WithAssertions {
 
@@ -20,8 +15,8 @@ class InputRepositoryTest implements WithAssertions {
     @DisplayName("reads the correct number of players")
     void loadsCorrectNumberOfPlayers() {
         PlayerInputProvider inputProvider =
-                new PlayerInputProvider(3, 0, anyPoint(), new Spot[] { anyPoint(), anyPoint() });
-        InputRepository repo = new InputRepository(inputProvider::inputStream);
+                new PlayerInputProvider(3, 0, anyPoint(), new Player.Spot[] { anyPoint(), anyPoint() });
+        Player.InputRepository repo = new Player.InputRepository(inputProvider::inputStream);
         repo.update();
 
         assertThat(repo.getN()).isEqualTo(3);
@@ -31,8 +26,8 @@ class InputRepositoryTest implements WithAssertions {
     @DisplayName("reads the correct player id")
     void loadsCorrectPlayerId() {
         PlayerInputProvider inputProvider =
-                new PlayerInputProvider(3, 2, anyPoint(), new Spot[] { anyPoint(), anyPoint() });
-        InputRepository repo = new InputRepository(inputProvider::inputStream);
+                new PlayerInputProvider(3, 2, anyPoint(), new Player.Spot[] { anyPoint(), anyPoint() });
+        Player.InputRepository repo = new Player.InputRepository(inputProvider::inputStream);
         repo.update();
 
         assertThat(repo.getP()).isEqualTo(2);
@@ -41,29 +36,29 @@ class InputRepositoryTest implements WithAssertions {
     @Test
     @DisplayName("returns the player lightcycle")
     void returnsThePlayerLightCycle() {
-        Spot playerStartingSpot = anyPoint();
+        Player.Spot playerStartingSpot = anyPoint();
 
         PlayerInputProvider inputProvider =
-                new PlayerInputProvider(3, 2, playerStartingSpot, new Spot[] { anyPoint(), anyPoint() });
-        InputRepository repo = new InputRepository(inputProvider::inputStream);
+                new PlayerInputProvider(3, 2, playerStartingSpot, new Player.Spot[] { anyPoint(), anyPoint() });
+        Player.InputRepository repo = new Player.InputRepository(inputProvider::inputStream);
         repo.update();
 
-        Spot playerLightCycle = repo.getPlayerLightCycleStartSpot();
+        Player.Spot playerLightCycle = repo.getPlayerLightCycleStartSpot();
         assertThat(playerLightCycle).isEqualTo(playerStartingSpot);
     }
 
     @Test
     @DisplayName("returns all opponent lightcycles")
     void returnsAllOpponentLightCycles() {
-        Spot opponent1LightCycle = anyPoint();
-        Spot opponent2LightCycle = anyPoint();
+        Player.Spot opponent1LightCycle = anyPoint();
+        Player.Spot opponent2LightCycle = anyPoint();
 
         PlayerInputProvider inputProvider =
-                new PlayerInputProvider(3, 2, anyPoint(), new Spot[] { opponent1LightCycle, opponent2LightCycle });
-        InputRepository repo = new InputRepository(inputProvider::inputStream);
+                new PlayerInputProvider(3, 2, anyPoint(), new Player.Spot[] { opponent1LightCycle, opponent2LightCycle });
+        Player.InputRepository repo = new Player.InputRepository(inputProvider::inputStream);
         repo.update();
 
-        Set<Spot> opponentLightCycles = repo.getOpponentLightCyclesStartSpot();
+        Set<Player.Spot> opponentLightCycles = repo.getOpponentLightCyclesStartSpot();
 
         assertThat(opponentLightCycles)
                 .contains(opponent1LightCycle, opponent2LightCycle);
@@ -79,8 +74,8 @@ class InputRepositoryTest implements WithAssertions {
         PlayerInputProvider(
                 int N,
                 int P,
-                Spot playerP0,
-                Spot[] opponentsP0) {
+                Player.Spot playerP0,
+                Player.Spot[] opponentsP0) {
 
             this(N, P, playerP0, playerP0, opponentsP0, opponentsP0);
         }
@@ -88,10 +83,10 @@ class InputRepositoryTest implements WithAssertions {
         PlayerInputProvider(
                 int N,
                 int P,
-                Spot playerP0,
-                Spot playerP1,
-                Spot[] opponentsP0,
-                Spot[] opponentsP1) {
+                Player.Spot playerP0,
+                Player.Spot playerP1,
+                Player.Spot[] opponentsP0,
+                Player.Spot[] opponentsP1) {
 
             Preconditions.checkNotNullOrEmpty(opponentsP0);
 
@@ -100,7 +95,7 @@ class InputRepositoryTest implements WithAssertions {
             inputStream.add(N);
             inputStream.add(P);
 
-            Spot[] spots = new Spot[2 * N];
+            Player.Spot[] spots = new Player.Spot[2 * N];
 
             for (int i = 0; i < N; i++) {
                 if (i == P) {
@@ -115,7 +110,7 @@ class InputRepositoryTest implements WithAssertions {
                 }
             }
 
-            for (Spot p : spots) {
+            for (Player.Spot p : spots) {
                 inputStream.add(p.getX());
                 inputStream.add(p.getY());
             }
@@ -126,8 +121,8 @@ class InputRepositoryTest implements WithAssertions {
         }
     }
 
-    private static Spot anyPoint() {
+    private static Player.Spot anyPoint() {
         Random random = new Random();
-        return new Spot(random.nextInt(KnowledgeRepo.GRID_X), random.nextInt(KnowledgeRepo.GRID_Y));
+        return new Player.Spot(random.nextInt(KnowledgeRepo.GRID_X), random.nextInt(KnowledgeRepo.GRID_Y));
     }
 }

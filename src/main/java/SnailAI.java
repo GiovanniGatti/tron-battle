@@ -1,10 +1,4 @@
-package player;
-
 import java.util.List;
-
-import player.Player.Action;
-import player.Player.ActionsType;
-import player.Player.Spot;
 
 /**
  * AIs tries to not kill itself by moving on a snail sequence
@@ -19,24 +13,24 @@ public class SnailAI extends Player.AI {
     }
 
     @Override
-    public Action[] play() {
-        List<ActionsType> possibleActions = repo.getPossibleActions();
+    public Player.Action[] play() {
+        List<Player.ActionsType> possibleActions = repo.getPossibleActions();
 
         if (possibleActions.isEmpty()) {
-            return new Action[] { new Action(ActionsType.DOWN) };
+            return new Player.Action[] { new Player.Action(Player.ActionsType.DOWN) };
         }
 
-        Spot startSpot = repo.getPlayerStartingSpot();
-        Spot currentSpot = repo.getPlayerCurrentSpot();
+        Player.Spot startSpot = repo.getPlayerStartingSpot();
+        Player.Spot currentSpot = repo.getPlayerCurrentSpot();
 
-        ActionsType bestMovement = possibleActions.remove(0);
-        Spot next = currentSpot.next(bestMovement);
+        Player.ActionsType bestMovement = possibleActions.remove(0);
+        Player.Spot next = currentSpot.next(bestMovement);
         double bestScore = startSpot.squareDistTo(next);
         if (repo.getPossibleActionsFor(next).size() < 2) {
             bestScore = Integer.MAX_VALUE;
         }
 
-        for (ActionsType type : possibleActions) {
+        for (Player.ActionsType type : possibleActions) {
 
             next = currentSpot.next(type);
             double score = startSpot.squareDistTo(next);
@@ -50,6 +44,6 @@ public class SnailAI extends Player.AI {
             }
         }
 
-        return new Action[] { new Action(bestMovement) };
+        return new Player.Action[] { new Player.Action(bestMovement) };
     }
 }

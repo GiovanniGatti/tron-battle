@@ -1,14 +1,10 @@
-package player;
-
 import java.util.List;
 import java.util.Random;
-
-import player.Player.AI;
 
 /**
  * Dumbest AI possible: it does random movements considering all available possibilities
  */
-class RandomAI extends AI {
+class RandomAI extends Player.AI {
 
     private final KnowledgeRepo repo;
 

@@ -1,5 +1,3 @@
-package player;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,7 +12,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.function.IntSupplier;
 
-public final class Player {
+final class Player {
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
@@ -88,7 +86,7 @@ public final class Player {
     static class LongestSequenceAI extends GeneticAI {
 
         public LongestSequenceAI(InputRepository repository) {
-            super(64, 128, 32, .7, .1, repository, LongestSequenceAI::evaluate);
+            super(64, 32, 512, .7, .1, repository, LongestSequenceAI::evaluate);
         }
 
         private static double evaluate(TronSimulator engine, Spot startAt, ActionsType[] actions) {

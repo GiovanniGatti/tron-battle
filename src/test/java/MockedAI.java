@@ -1,10 +1,6 @@
-package player;
-
 import org.mockito.Mockito;
 
 import com.google.common.base.MoreObjects;
-
-import player.Player.Action;
 
 public final class MockedAI {
 
@@ -16,7 +12,7 @@ public final class MockedAI {
         return new AIMapper(newBuilder().build());
     }
 
-    public static AIMapper anyWithActions(Action... actions) {
+    public static AIMapper anyWithActions(Player.Action... actions) {
         return new AIMapper(newBuilder()
                 .withActions(actions)
                 .build());
@@ -28,13 +24,13 @@ public final class MockedAI {
 
     public static class Builder {
 
-        private Action[] actions;
+        private Player.Action[] actions;
 
         private Builder() {
-            this.actions = new Action[] { Mockito.mock(Action.class) };
+            this.actions = new Player.Action[] { Mockito.mock(Player.Action.class) };
         }
 
-        public Builder withActions(Action... actions) {
+        public Builder withActions(Player.Action... actions) {
             this.actions = actions;
             return this;
         }
@@ -46,15 +42,16 @@ public final class MockedAI {
 
     private static class MockedArtificialIntelligence extends Player.AI {
 
-        private final Action[] actions;
+        private final Player.Action[] actions;
 
-        private MockedArtificialIntelligence(Action[] actions) {
-            super(() -> {});
+        private MockedArtificialIntelligence(Player.Action[] actions) {
+            super(() -> {
+            });
             this.actions = actions;
         }
 
         @Override
-        public Action[] play() {
+        public Player.Action[] play() {
             return actions;
         }
 

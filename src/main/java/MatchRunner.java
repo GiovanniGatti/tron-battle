@@ -1,5 +1,3 @@
-package player;
-
 public final class MatchRunner {
 
     private MatchRunner() {

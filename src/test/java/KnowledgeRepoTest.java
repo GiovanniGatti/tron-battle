@@ -1,5 +1,3 @@
-package player;
-
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Queue;
@@ -11,9 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import player.Player.ActionsType;
-import player.Player.Spot;
-
 @DisplayName("A knowledge repository")
 class KnowledgeRepoTest implements WithAssertions {
 
@@ -21,7 +16,7 @@ class KnowledgeRepoTest implements WithAssertions {
     @DisplayName("reads the correct number of players")
     void loadsCorrectNumberOfPlayers() {
         PlayerInputProvider inputProvider =
-                new PlayerInputProvider(3, 0, anyPoint(), new Spot[] { anyPoint(), anyPoint() });
+                new PlayerInputProvider(3, 0, anyPoint(), new Player.Spot[] { anyPoint(), anyPoint() });
         KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
         repo.update();
 
@@ -32,7 +27,7 @@ class KnowledgeRepoTest implements WithAssertions {
     @DisplayName("reads the correct player id")
     void loadsCorrectPlayerId() {
         PlayerInputProvider inputProvider =
-                new PlayerInputProvider(3, 2, anyPoint(), new Spot[] { anyPoint(), anyPoint() });
+                new PlayerInputProvider(3, 2, anyPoint(), new Player.Spot[] { anyPoint(), anyPoint() });
         KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
         repo.update();
 
@@ -42,17 +37,17 @@ class KnowledgeRepoTest implements WithAssertions {
     @Test
     @DisplayName("reads both player and opponent points")
     void loadsAllPlayerPoints() {
-        Spot p0 = new Spot(0, 1);
-        Spot p1 = new Spot(0, 2);
+        Player.Spot p0 = new Player.Spot(0, 1);
+        Player.Spot p1 = new Player.Spot(0, 2);
 
-        Spot opponentP0 = new Spot(0, 3);
-        Spot opponentP1 = new Spot(0, 4);
+        Player.Spot opponentP0 = new Player.Spot(0, 3);
+        Player.Spot opponentP1 = new Player.Spot(0, 4);
 
         PlayerInputProvider inputProvider =
                 new PlayerInputProvider(
                         2, 1,
                         p0, p1,
-                        new Spot[] { opponentP0 }, new Spot[] { opponentP1 });
+                        new Player.Spot[] { opponentP0 }, new Player.Spot[] { opponentP1 });
         KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
         repo.update();
 
@@ -67,57 +62,57 @@ class KnowledgeRepoTest implements WithAssertions {
         @Test
         @DisplayName("returns right or down if player is at the upper left corner")
         void onLeftUpperCorner() {
-            Spot player = new Spot(0, 0);
-            Spot opponent = new Spot(5, 10);
+            Player.Spot player = new Player.Spot(0, 0);
+            Player.Spot opponent = new Player.Spot(5, 10);
 
-            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
+            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Player.Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
             repo.update();
-            List<ActionsType> actions = repo.getPossibleActions();
+            List<Player.ActionsType> actions = repo.getPossibleActions();
 
-            assertThat(actions).containsOnly(ActionsType.DOWN, ActionsType.RIGHT);
+            assertThat(actions).containsOnly(Player.ActionsType.DOWN, Player.ActionsType.RIGHT);
         }
 
         @Test
         @DisplayName("returns up or right if player is at left lower corner")
         void onLeftLowerCorner() {
-            Spot player = new Spot(0, 19);
-            Spot opponent = new Spot(5, 10);
+            Player.Spot player = new Player.Spot(0, 19);
+            Player.Spot opponent = new Player.Spot(5, 10);
 
-            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
+            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Player.Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
             repo.update();
-            List<ActionsType> actions = repo.getPossibleActions();
+            List<Player.ActionsType> actions = repo.getPossibleActions();
 
-            assertThat(actions).containsOnly(ActionsType.UP, ActionsType.RIGHT);
+            assertThat(actions).containsOnly(Player.ActionsType.UP, Player.ActionsType.RIGHT);
         }
 
         @org.junit.jupiter.api.Test
         @DisplayName("returns left or down if player is at right upper corner")
         void onRightUpperCorner() {
-            Spot player = new Spot(29, 0);
-            Spot opponent = new Spot(5, 10);
+            Player.Spot player = new Player.Spot(29, 0);
+            Player.Spot opponent = new Player.Spot(5, 10);
 
-            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
+            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Player.Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
             repo.update();
-            List<ActionsType> actions = repo.getPossibleActions();
+            List<Player.ActionsType> actions = repo.getPossibleActions();
 
-            assertThat(actions).containsOnly(ActionsType.DOWN, ActionsType.LEFT);
+            assertThat(actions).containsOnly(Player.ActionsType.DOWN, Player.ActionsType.LEFT);
         }
 
         @org.junit.jupiter.api.Test
         @DisplayName("returns left or up if player is at right lower corner")
         void onRightLowerCorner() {
-            Spot player = new Spot(29, 19);
-            Spot opponent = new Spot(5, 10);
+            Player.Spot player = new Player.Spot(29, 19);
+            Player.Spot opponent = new Player.Spot(5, 10);
 
-            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Spot[] { opponent });
+            PlayerInputProvider inputProvider = new PlayerInputProvider(2, 0, player, new Player.Spot[] { opponent });
             KnowledgeRepo repo = new KnowledgeRepo(inputProvider::inputStream);
             repo.update();
-            List<ActionsType> actions = repo.getPossibleActions();
+            List<Player.ActionsType> actions = repo.getPossibleActions();
 
-            assertThat(actions).containsOnly(ActionsType.UP, ActionsType.LEFT);
+            assertThat(actions).containsOnly(Player.ActionsType.UP, Player.ActionsType.LEFT);
         }
     }
 
@@ -128,8 +123,8 @@ class KnowledgeRepoTest implements WithAssertions {
         PlayerInputProvider(
                 int N,
                 int P,
-                Spot playerP0,
-                Spot[] opponentsP0) {
+                Player.Spot playerP0,
+                Player.Spot[] opponentsP0) {
 
             this(N, P, playerP0, playerP0, opponentsP0, opponentsP0);
         }
@@ -137,10 +132,10 @@ class KnowledgeRepoTest implements WithAssertions {
         PlayerInputProvider(
                 int N,
                 int P,
-                Spot playerP0,
-                Spot playerP1,
-                Spot[] opponentsP0,
-                Spot[] opponentsP1) {
+                Player.Spot playerP0,
+                Player.Spot playerP1,
+                Player.Spot[] opponentsP0,
+                Player.Spot[] opponentsP1) {
 
             Preconditions.checkNotNullOrEmpty(opponentsP0);
 
@@ -149,7 +144,7 @@ class KnowledgeRepoTest implements WithAssertions {
             inputStream.add(N);
             inputStream.add(P);
 
-            Spot[] spots = new Spot[2 * N];
+            Player.Spot[] spots = new Player.Spot[2 * N];
 
             for (int i = 0; i < N; i++) {
                 if (i == P) {
@@ -164,7 +159,7 @@ class KnowledgeRepoTest implements WithAssertions {
                 }
             }
 
-            for (Spot p : spots) {
+            for (Player.Spot p : spots) {
                 inputStream.add(p.getX());
                 inputStream.add(p.getY());
             }
@@ -175,9 +170,9 @@ class KnowledgeRepoTest implements WithAssertions {
         }
     }
 
-    private static Spot anyPoint() {
+    private static Player.Spot anyPoint() {
         Random random = new Random();
-        return new Spot(random.nextInt(KnowledgeRepo.GRID_X), random.nextInt(KnowledgeRepo.GRID_Y));
+        return new Player.Spot(random.nextInt(KnowledgeRepo.GRID_X), random.nextInt(KnowledgeRepo.GRID_Y));
     }
 
 }

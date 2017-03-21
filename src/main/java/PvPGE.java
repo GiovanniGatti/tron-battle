@@ -1,5 +1,3 @@
-package player;
-
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -8,9 +6,6 @@ import javax.annotation.concurrent.Immutable;
 
 import com.google.common.base.Preconditions;
 
-import player.Player.Action;
-import player.Player.BattleField;
-import player.Player.Spot;
 import player.engine.AbstractGE;
 import player.engine.State;
 import player.engine.Winner;
@@ -22,15 +17,16 @@ public final class PvPGE extends AbstractGE<AIMapper> {
     private final TronGameEngine gameEngine;
 
     private final boolean playerFirst;
-    private final Spot playerStartSpot;
-    private final Spot opponentStartSpot;
+    private final Player.Spot playerStartSpot;
+    private final Player.Spot opponentStartSpot;
 
     private int playerScore;
     private int opponentScore;
 
-    public static PvPGE withFreshBattleField(boolean playerFirst, Spot playerStartSpot, Spot opponentStartSpot) {
+    public static PvPGE withFreshBattleField(boolean playerFirst, Player.Spot playerStartSpot,
+            Player.Spot opponentStartSpot) {
 
-        BattleField battleField = new BattleField();
+        Player.BattleField battleField = new Player.BattleField();
         battleField.addLightCycleAt(playerStartSpot, playerStartSpot);
         battleField.addLightCycleAt(opponentStartSpot, opponentStartSpot);
 
@@ -39,9 +35,9 @@ public final class PvPGE extends AbstractGE<AIMapper> {
 
     public PvPGE(
             boolean playerFirst,
-            BattleField battleField,
-            Spot playerStartSpot,
-            Spot opponentStartSpot) {
+            Player.BattleField battleField,
+            Player.Spot playerStartSpot,
+            Player.Spot opponentStartSpot) {
 
         Preconditions.checkArgument(battleField.hasLightCycleStartingAt(playerStartSpot),
                 "Player could not be found in grid at " + playerStartSpot);
@@ -62,9 +58,9 @@ public final class PvPGE extends AbstractGE<AIMapper> {
 
     @Override
     protected Winner runRound(AIMapper player, AIMapper opponent) {
-        Spot firstStartSpot, secondStartSpot;
+        Player.Spot firstStartSpot, secondStartSpot;
         AIMapper first, second;
-        Consumer<Spot> firstInput, secondInput;
+        Consumer<Player.Spot> firstInput, secondInput;
         Consumer<Integer> metadataFirstInput, metadataSecondInput;
 
         if (playerFirst) {
@@ -98,7 +94,7 @@ public final class PvPGE extends AbstractGE<AIMapper> {
         firstInput.accept(gameEngine.getCurrent(secondStartSpot));
 
         first.updateRepository();
-        Action firstAction = first.play()[0];
+        Player.Action firstAction = first.play()[0];
 
         gameEngine.perform(firstStartSpot, firstAction.getType());
 
@@ -121,7 +117,7 @@ public final class PvPGE extends AbstractGE<AIMapper> {
         secondInput.accept(gameEngine.getCurrent(secondStartSpot));
 
         second.updateRepository();
-        Action secondAction = second.play()[0];
+        Player.Action secondAction = second.play()[0];
 
         gameEngine.perform(secondStartSpot, secondAction.getType());
 
@@ -153,14 +149,14 @@ public final class PvPGE extends AbstractGE<AIMapper> {
         return initialState;
     }
 
-    private void toPlayerInput(Spot... spots) {
-        for (Spot spot : spots) {
+    private void toPlayerInput(Player.Spot... spots) {
+        for (Player.Spot spot : spots) {
             super.toPlayerInput(spot.getX(), spot.getY());
         }
     }
 
-    private void toOpponentInput(Spot... spots) {
-        for (Spot spot : spots) {
+    private void toOpponentInput(Player.Spot... spots) {
+        for (Player.Spot spot : spots) {
             super.toOpponentInput(spot.getX(), spot.getY());
         }
     }
@@ -194,10 +190,10 @@ public final class PvPGE extends AbstractGE<AIMapper> {
     @Immutable
     private static class InitialStateSnapshot implements State {
 
-        private final BattleField battleField;
+        private final Player.BattleField battleField;
 
-        public InitialStateSnapshot(BattleField battleField) {
-            this.battleField = new BattleField(battleField);
+        public InitialStateSnapshot(Player.BattleField battleField) {
+            this.battleField = new Player.BattleField(battleField);
         }
 
         @Override

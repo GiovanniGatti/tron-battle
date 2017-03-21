@@ -1,5 +1,3 @@
-package player;
-
 import com.google.common.base.MoreObjects;
 
 import player.engine.AI;

@@ -27,7 +27,7 @@ public final class ContestRunner {
                 generateGameEngines(),
                 gamePool,
                 matchPool,
-                10);
+                15);
 
         Contest.ContestResult call = contest.call();
 
@@ -50,18 +50,11 @@ public final class ContestRunner {
     }
 
     private static List<Supplier<GameEngine>> generateGameEngines() {
-        Player.Spot playerStartSpot1 = new Player.Spot(6, 2);
-        Player.Spot opponentStartSpot1 = new Player.Spot(3, 17);
-
-        Player.Spot playerStartSpot2 = new Player.Spot(10, 1);
-        Player.Spot opponentStartSpot2 = new Player.Spot(28, 0);
-
-        Player.Spot playerStartSpot3 = new Player.Spot(26, 5);
-        Player.Spot opponentStartSpot3 = new Player.Spot(17, 12);
+        Player.Spot spot1 = new Player.Spot(6, 2);
+        Player.Spot spot2 = new Player.Spot(3, 17);
 
         return Arrays.asList(
-                () -> PvPGE.withFreshBattleField(false, playerStartSpot1, opponentStartSpot1),
-                () -> PvPGE.withFreshBattleField(false, playerStartSpot2, opponentStartSpot2),
-                () -> PvPGE.withFreshBattleField(false, playerStartSpot3, opponentStartSpot3));
+                () -> PvPGE.withFreshBattleField(false, spot1, spot2),
+                () -> PvPGE.withFreshBattleField(false, spot2, spot1));
     }
 }

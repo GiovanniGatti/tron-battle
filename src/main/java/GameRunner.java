@@ -21,10 +21,10 @@ public final class GameRunner {
                 playerInput -> () -> new AIMapper(
                         new Player.RelaxedLongestSequenceAI(new Player.InputRepository(playerInput))),
                 opponentInput -> () -> new AIMapper(
-                        new LongestSequenceAI(new Player.InputRepository(opponentInput))),
+                        new SnailAI(new KnowledgeRepo(opponentInput))),
                 () -> PvPGE.withFreshBattleField(false, playerStartSpot, opponentStartSpot),
                 pool,
-                20);
+                301);
 
         Game.GameResult call = game.call();
 

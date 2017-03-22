@@ -141,6 +141,7 @@ public final class Contest implements Callable<Contest.ContestResult> {
 
         private static final Comparator<Score> SCORE_COMPARATOR =
                 Comparator.comparing(Score::getVictoryCount)
+                        .thenComparing(Score::getAverageWinRate)
                         .thenComparing(Score::getAverageScore)
                         .thenComparing(Score::getAverageNumberOfRounds)
                         .reversed();

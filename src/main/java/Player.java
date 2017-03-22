@@ -159,9 +159,9 @@ final class Player {
 
         @Override
         public Action[] play() {
-            long currentTimeMillis = System.currentTimeMillis();
+//            long currentTimeMillis = System.currentTimeMillis();
             Chromosome chromosome = find(geneLength, popSize, generations);
-            System.err.println(System.currentTimeMillis() - currentTimeMillis);
+//            System.err.println(System.currentTimeMillis() - currentTimeMillis);
 
             BattleFieldSnapshot battleField = repo.getBattleField();
 
@@ -270,7 +270,7 @@ final class Player {
                     .max(Comparator.comparingDouble(Chromosome::getScore))
                     .orElseThrow(() -> new IllegalStateException("Pool should contain at least one chromosome"));
 
-            System.err.println(best.getScore());
+//            System.err.println(best.getScore());
             // System.err.println("===");
             return best;
         }

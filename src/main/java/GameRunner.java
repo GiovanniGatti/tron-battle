@@ -14,16 +14,17 @@ public final class GameRunner {
 
         ExecutorService pool = Executors.newFixedThreadPool(5);
 
-        Player.Spot playerStartSpot = new Player.Spot(15, 10);
-        Player.Spot opponentStartSpot = new Player.Spot(0, 0);
+        Player.Spot playerStartSpot = new Player.Spot(6, 2);
+        Player.Spot opponentStartSpot = new Player.Spot(3, 17);
 
         Game game = new Game(
                 playerInput -> () -> new AIMapper(
-                        new SnailAI(new KnowledgeRepo(playerInput))),
+                        new Player.RelaxedLongestSequenceAI(new Player.InputRepository(playerInput))),
                 opponentInput -> () -> new AIMapper(
-                        new Player.LongestSequenceAI(new Player.InputRepository(opponentInput))),
+                        new LongestSequenceAI(new Player.InputRepository(opponentInput))),
                 () -> PvPGE.withFreshBattleField(false, playerStartSpot, opponentStartSpot),
-                pool);
+                pool,
+                20);
 
         Game.GameResult call = game.call();
 

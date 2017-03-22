@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
@@ -18,7 +19,7 @@ final class Player {
         Scanner in = new Scanner(System.in);
 
         InputRepository repo = new InputRepository(in::nextInt);
-        AI ai = new LongestSequenceAI(repo);
+        AI ai = new RelaxedLongestSequenceAI(repo);
 
         while (true) {
             ai.updateRepository();
@@ -83,22 +84,19 @@ final class Player {
         }
     }
 
-    static class LongestSequenceAI extends GeneticAI {
+    static class RelaxedLongestSequenceAI extends GeneticAI {
 
-        public LongestSequenceAI(InputRepository repository) {
-            super(64, 32, 512, .7, .1, repository, LongestSequenceAI::evaluate);
+        public RelaxedLongestSequenceAI(InputRepository repository) {
+            super(64, 32, 256, .7, .02, repository, RelaxedLongestSequenceAI::evaluate);
         }
 
         private static double evaluate(TronSimulator engine, Spot startAt, ActionsType[] actions) {
             double score = 0.0;
 
             for (ActionsType action : actions) {
-
-                if (!engine.perform(startAt, action)) {
-                    break;
+                if (engine.perform(startAt, action)) {
+                    score += 1.0;
                 }
-
-                score += 1.0;
             }
 
             return score / actions.length;
@@ -106,7 +104,7 @@ final class Player {
 
         @Override
         public String toString() {
-            return "LongestSequenceAI{}" + super.toString();
+            return "RelaxedLongestSequenceAI{}" + super.toString();
         }
     }
 
@@ -165,7 +163,18 @@ final class Player {
             Chromosome chromosome = find(geneLength, popSize, generations);
             System.err.println(System.currentTimeMillis() - currentTimeMillis);
 
-            ActionsType nextAction = chromosome.genes[0];
+            BattleFieldSnapshot battleField = repo.getBattleField();
+
+            Spot startSpot = repo.getPlayerLightCycleStartSpot();
+            Spot currentSpot = battleField.getCurrentSpot(startSpot);
+
+            Optional<ActionsType> maybeNextValidMove = Arrays.stream(chromosome.genes)
+                    .filter(actionsType -> {
+                        Spot next = currentSpot.next(actionsType);
+                        return !battleField.hasBeenVisited(next);
+                    }).findFirst();
+
+            ActionsType nextAction = maybeNextValidMove.orElse(ActionsType.RIGHT);
 
             return new Action[] { new Action(nextAction) };
         }
@@ -628,7 +637,14 @@ final class Player {
         }
 
         public boolean hasBeenVisited(Spot spot) {
-            return grid[spot.getY()][spot.getX()];
+            return isWithinGrid(spot) && grid[spot.getY()][spot.getX()];
+        }
+
+        private boolean isWithinGrid(Spot spot) {
+            return spot.getX() >= 0 &&
+                    spot.getX() < grid[0].length &&
+                    spot.getY() >= 0 &&
+                    spot.getY() < grid.length;
         }
     }
 

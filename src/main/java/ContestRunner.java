@@ -44,6 +44,8 @@ public final class ContestRunner {
                 playerInput -> () -> new AIMapper(
                         new LongestSequenceAI(new Player.InputRepository(playerInput))),
                 playerInput -> () -> new AIMapper(
+                        new Player.FibonacciLongestSequenceAI(new Player.InputRepository(playerInput))),
+                playerInput -> () -> new AIMapper(
                         new SnailAI(new KnowledgeRepo(playerInput))),
                 playerInput -> () -> new AIMapper(
                         new RandomAI(new KnowledgeRepo(playerInput))));

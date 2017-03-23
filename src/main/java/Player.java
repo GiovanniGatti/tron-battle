@@ -84,6 +84,76 @@ final class Player {
         }
     }
 
+    static class DegreesOfFreedomAI extends AI {
+
+        private InputRepository repo;
+
+        public DegreesOfFreedomAI(InputRepository repo) {
+            super(repo);
+            this.repo = repo;
+        }
+
+        @Override
+        public Action[] play() {
+            BattleFieldSnapshot battleField = repo.getBattleField();
+
+
+
+            return new Action[0];
+        }
+    }
+
+    static class FibonacciLongestSequenceAI extends GeneticAI {
+
+        private static final long MAX_VALUE = fibonacci(64);
+
+        public FibonacciLongestSequenceAI(InputRepository repository) {
+            super(64, 32, 256, .7, .02, repository, FibonacciLongestSequenceAI::evaluate);
+        }
+
+        private static long fibonacci(int size) {
+
+            long previous = 0L;
+            long next = 1L;
+
+            for (int i = 0; i < size; i++) {
+                long tmp = next;
+                next += previous;
+                previous = tmp;
+            }
+
+            return next;
+        }
+
+        private static double evaluate(TronSimulator engine, Spot startAt, ActionsType[] actions) {
+            double score = 0.0;
+
+            long weight = 1L;
+            long previousWeight = 0L;
+
+            for (ActionsType action : actions) {
+
+                if (engine.perform(startAt, action)) {
+                    long tmp = weight;
+                    weight += previousWeight;
+                    previousWeight = tmp;
+                } else {
+                    weight = 1L;
+                    previousWeight = 0L;
+                }
+
+                score += weight;
+            }
+
+            return score / MAX_VALUE;
+        }
+
+        @Override
+        public String toString() {
+            return "FibonacciLongestSequenceAI{}" + super.toString();
+        }
+    }
+
     static class RelaxedLongestSequenceAI extends GeneticAI {
 
         public RelaxedLongestSequenceAI(InputRepository repository) {
@@ -159,9 +229,9 @@ final class Player {
 
         @Override
         public Action[] play() {
-//            long currentTimeMillis = System.currentTimeMillis();
+            // long currentTimeMillis = System.currentTimeMillis();
             Chromosome chromosome = find(geneLength, popSize, generations);
-//            System.err.println(System.currentTimeMillis() - currentTimeMillis);
+            // System.err.println(System.currentTimeMillis() - currentTimeMillis);
 
             BattleFieldSnapshot battleField = repo.getBattleField();
 
@@ -270,7 +340,7 @@ final class Player {
                     .max(Comparator.comparingDouble(Chromosome::getScore))
                     .orElseThrow(() -> new IllegalStateException("Pool should contain at least one chromosome"));
 
-//            System.err.println(best.getScore());
+            // System.err.println(best.getScore());
             // System.err.println("===");
             return best;
         }

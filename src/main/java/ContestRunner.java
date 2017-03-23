@@ -50,11 +50,30 @@ public final class ContestRunner {
     }
 
     private static List<Supplier<GameEngine>> generateGameEngines() {
-        Player.Spot spot1 = new Player.Spot(6, 2);
-        Player.Spot spot2 = new Player.Spot(3, 17);
+        // scenario 1 - one in the center, the other on the top corner
+        Player.Spot scenario11 = new Player.Spot(6, 2);
+        Player.Spot scenario12 = new Player.Spot(15, 10);
+
+        // scenario 2 - both on opposite corners
+        Player.Spot scenario21 = new Player.Spot(6, 2);
+        Player.Spot scenario22 = new Player.Spot(23, 17);
+
+        // scenario 3 - both close to center
+        Player.Spot scenario31 = new Player.Spot(10, 8);
+        Player.Spot scenario32 = new Player.Spot(20, 12);
+
+        // scenario 4 - both close to top corner
+        Player.Spot scenario41 = new Player.Spot(6, 2);
+        Player.Spot scenario42 = new Player.Spot(2, 6);
 
         return Arrays.asList(
-                () -> PvPGE.withFreshBattleField(false, spot1, spot2),
-                () -> PvPGE.withFreshBattleField(false, spot2, spot1));
+                () -> PvPGE.withFreshBattleField(false, scenario11, scenario12),
+                () -> PvPGE.withFreshBattleField(false, scenario12, scenario11),
+                () -> PvPGE.withFreshBattleField(false, scenario22, scenario21),
+                () -> PvPGE.withFreshBattleField(false, scenario21, scenario22),
+                () -> PvPGE.withFreshBattleField(false, scenario32, scenario31),
+                () -> PvPGE.withFreshBattleField(false, scenario31, scenario32),
+                () -> PvPGE.withFreshBattleField(false, scenario42, scenario41),
+                () -> PvPGE.withFreshBattleField(false, scenario41, scenario42));
     }
 }

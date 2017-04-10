@@ -19,7 +19,7 @@ public final class GameRunner {
 
         Game game = new Game(
                 playerInput -> () -> new AIMapper(
-                        new Player.RelaxedLongestSequenceAI(new Player.InputRepository(playerInput))),
+                        new Player.FibonacciLongestSequenceAI(new Player.InputRepository(playerInput))),
                 opponentInput -> () -> new AIMapper(
                         new SnailAI(new KnowledgeRepo(opponentInput))),
                 () -> PvPGE.withFreshBattleField(false, playerStartSpot, opponentStartSpot),

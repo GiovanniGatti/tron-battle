@@ -5,9 +5,6 @@ import java.util.Set;
 
 public final class TronGameEngine {
 
-    private static final int MAX_X = 30;
-    private static final int MAX_Y = 20;
-
     private final Player.BattleField battleField;
     private final Set<Player.Spot> deadPlayers;
 
@@ -25,7 +22,7 @@ public final class TronGameEngine {
         Player.Spot current = battleField.getCurrentSpot(startSpot);
         Player.Spot next = current.next(action);
 
-        if (next.getX() >= 0 && next.getX() < MAX_X && next.getY() >= 0 && next.getY() < MAX_Y) {
+        if (battleField.isWithinGrid(next)) {
             if (!battleField.hasBeenVisited(next)) {
                 battleField.moveTo(startSpot, next);
                 return;

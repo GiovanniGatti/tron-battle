@@ -19,7 +19,7 @@ final class Player {
         Scanner in = new Scanner(System.in);
 
         InputRepository repo = new InputRepository(in::nextInt);
-        AI ai = new RelaxedLongestSequenceAI(repo);
+        AI ai = new FibonacciLongestSequenceAI(repo);
 
         while (true) {
             ai.updateRepository();
@@ -71,7 +71,7 @@ final class Player {
 
             Spot next = currentSpot.next(action);
 
-            if ((next.getX() < 0 || next.getX() >= MAX_X || next.getY() < 0 || next.getY() >= MAX_Y)
+            if (!snapshot.isWithinGrid(next)
                     || grid[next.getY()][next.getX()]
                     || snapshot.hasBeenVisited(next)) {
                 return false;
@@ -81,25 +81,6 @@ final class Player {
             grid[next.getY()][next.getX()] = true;
 
             return true;
-        }
-    }
-
-    static class DegreesOfFreedomAI extends AI {
-
-        private InputRepository repo;
-
-        public DegreesOfFreedomAI(InputRepository repo) {
-            super(repo);
-            this.repo = repo;
-        }
-
-        @Override
-        public Action[] play() {
-            BattleFieldSnapshot battleField = repo.getBattleField();
-
-
-
-            return new Action[0];
         }
     }
 
@@ -241,7 +222,7 @@ final class Player {
             Optional<ActionsType> maybeNextValidMove = Arrays.stream(chromosome.genes)
                     .filter(actionsType -> {
                         Spot next = currentSpot.next(actionsType);
-                        return !battleField.hasBeenVisited(next);
+                        return battleField.isWithinGrid(next) && !battleField.hasBeenVisited(next);
                     }).findFirst();
 
             ActionsType nextAction = maybeNextValidMove.orElse(ActionsType.RIGHT);
@@ -637,8 +618,20 @@ final class Player {
             return currentSpot.get(startSpot);
         }
 
+        public boolean hasBeenVisited(int x, int y) {
+            return grid[y][x];
+        }
+
+        public boolean isWithinGrid(int x, int y) {
+            return x >= 0 && x < grid[0].length && y >= 0 && y < grid.length;
+        }
+
         public boolean hasBeenVisited(Spot spot) {
-            return grid[spot.getY()][spot.getX()];
+            return hasBeenVisited(spot.getX(), spot.getY());
+        }
+
+        public boolean isWithinGrid(Spot spot) {
+            return isWithinGrid(spot.getX(), spot.getY());
         }
 
         public Set<Spot> getStartSpots() {
@@ -658,7 +651,7 @@ final class Player {
         }
 
         public BattleFieldSnapshot getSnapshot() {
-            return new BattleFieldSnapshot(grid, currentSpot);
+            return new BattleFieldSnapshot(this);
         }
 
         @Override
@@ -685,36 +678,37 @@ final class Player {
 
     public static final class BattleFieldSnapshot {
 
-        private final boolean[][] grid;
-        private final Map<Spot, Spot> currentSpots;
+        private final BattleField battleField;
 
-        public BattleFieldSnapshot(
-                boolean[][] grid,
-                Map<Spot, Spot> currentSpots) {
+        public BattleFieldSnapshot(BattleField battleField) {
 
             // In order to optimize, we won't be copying the arena's state,
             // and therefore after each round the snapshot is deprecated
-            this.grid = grid;
-            this.currentSpots = currentSpots;
+            this.battleField = battleField;
         }
 
         public Set<Spot> getStartSpots() {
-            return currentSpots.keySet();
+            return battleField.getStartSpots();
         }
 
         public Spot getCurrentSpot(Spot startSpot) {
-            return currentSpots.get(startSpot);
+            return battleField.getCurrentSpot(startSpot);
+        }
+
+        public boolean hasBeenVisited(int x, int y) {
+            return battleField.hasBeenVisited(x, y);
+        }
+
+        public boolean isWithinGrid(int x, int y) {
+            return battleField.isWithinGrid(x, y);
         }
 
         public boolean hasBeenVisited(Spot spot) {
-            return isWithinGrid(spot) && grid[spot.getY()][spot.getX()];
+            return battleField.hasBeenVisited(spot);
         }
 
-        private boolean isWithinGrid(Spot spot) {
-            return spot.getX() >= 0 &&
-                    spot.getX() < grid[0].length &&
-                    spot.getY() >= 0 &&
-                    spot.getY() < grid.length;
+        public boolean isWithinGrid(Spot spot) {
+            return battleField.isWithinGrid(spot);
         }
     }
 

@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.IntSupplier;
 
 final class Player {
@@ -19,7 +20,7 @@ final class Player {
         Scanner in = new Scanner(System.in);
 
         InputRepository repo = new InputRepository(in::nextInt);
-        AI ai = new FibonacciLongestSequenceAI(repo);
+        AI ai = new FloodFillAI(repo);
 
         while (true) {
             ai.updateRepository();
@@ -43,6 +44,7 @@ final class Player {
         // mutable internal state
         private final boolean[][] grid;
         private final Map<Spot, Spot> currentSpots;
+        private int availableSpotsCnt;
 
         public TronSimulator(BattleFieldSnapshot snapshot) {
 
@@ -53,6 +55,8 @@ final class Player {
             Set<Spot> startSpots = snapshot.getStartSpots();
             this.currentSpots = new HashMap<>(startSpots.size());
             startSpots.forEach(s -> this.currentSpots.put(s, snapshot.getCurrentSpot(s)));
+
+            this.availableSpotsCnt = snapshot.getAvailableSpotsCount();
         }
 
         /**
@@ -71,16 +75,133 @@ final class Player {
 
             Spot next = currentSpot.next(action);
 
-            if (!snapshot.isWithinGrid(next)
-                    || grid[next.getY()][next.getX()]
-                    || snapshot.hasBeenVisited(next)) {
+            if (!getGridSize().isWithinGrid(next) || hasBeenVisited(next)) {
                 return false;
             }
 
             currentSpots.put(startAt, next);
             grid[next.getY()][next.getX()] = true;
+            availableSpotsCnt--;
 
             return true;
+        }
+
+        public boolean hasBeenVisited(Spot spot) {
+            return hasBeenVisited(spot.getX(), spot.getY());
+        }
+
+        public boolean hasBeenVisited(int x, int y) {
+            return grid[y][x] || snapshot.hasBeenVisited(x, y);
+        }
+
+        public Spot getCurrentSpot(Spot startSpot) {
+            if (!currentSpots.containsKey(startSpot)) {
+                throw new IllegalStateException("Unknown player starting at " + startSpot);
+            }
+
+            return currentSpots.get(startSpot);
+        }
+
+        public Set<Spot> getStartSpots() {
+            return currentSpots.keySet();
+        }
+
+        public GridSize getGridSize() {
+            return snapshot.getGridSize();
+        }
+
+        public int getAvailableSpotsCount() {
+            return availableSpotsCnt;
+        }
+    }
+
+    static class FloodFillAI extends GeneticAI {
+
+        public FloodFillAI(InputRepository repository) {
+            super(64, 32, 256, .7, .02, repository, FloodFillAI::evaluate);
+        }
+
+        private static double evaluate(TronSimulator engine, Spot startAt, ActionsType[] actions) {
+            double weight = 1.0;
+
+            for (ActionsType action : actions) {
+                if (!engine.perform(startAt, action)) {
+                    weight = weight - (1.0 / actions.length);
+                }
+            }
+
+            int targetableArea = floodFillArea(
+                    spot -> !engine.hasBeenVisited(spot),
+                    engine.getGridSize(),
+                    engine.getCurrentSpot(startAt));
+
+            return ((double) targetableArea / engine.getAvailableSpotsCount()) * weight;
+        }
+
+        /**
+         * Computes the available area within a grid from a given target point
+         *
+         * @param availableSpot a function that computes whether a spot is or is not available to be moved in
+         * @param gridSize the grid size evaluator
+         * @param target a target spot to start the algorithm. It might be an occupied spot.
+         */
+        static int floodFillArea(AvailableSpot availableSpot, GridSize gridSize, Spot target) {
+            boolean[][] colored = new boolean[gridSize.getMaxY()][gridSize.getMaxX()];
+            colored[target.getY()][target.getX()] = true;
+
+            int size = 0;
+
+            Stack<Spot> evaluationStack = new Stack<>();
+            evaluationStack.push(target);
+
+            while (!evaluationStack.isEmpty()) {
+                size++;
+
+                Spot last = evaluationStack.pop();
+                Spot up = last.next(ActionsType.UP);
+                Spot down = last.next(ActionsType.DOWN);
+                Spot left = last.next(ActionsType.LEFT);
+                Spot right = last.next(ActionsType.RIGHT);
+
+                if (gridSize.isWithinGrid(up) &&
+                        availableSpot.evaluate(up) &&
+                        !colored[up.getY()][up.getX()]) {
+
+                    evaluationStack.push(up);
+                    colored[up.getY()][up.getX()] = true;
+                }
+
+                if (gridSize.isWithinGrid(down) &&
+                        availableSpot.evaluate(down) &&
+                        !colored[down.getY()][down.getX()]) {
+
+                    evaluationStack.push(down);
+                    colored[down.getY()][down.getX()] = true;
+                }
+
+                if (gridSize.isWithinGrid(left) &&
+                        availableSpot.evaluate(left) &&
+                        !colored[left.getY()][left.getX()]) {
+                    evaluationStack.push(left);
+                    colored[left.getY()][left.getX()] = true;
+                }
+
+                if (gridSize.isWithinGrid(right) &&
+                        availableSpot.evaluate(right) &&
+                        !colored[right.getY()][right.getX()]) {
+                    evaluationStack.push(right);
+                    colored[right.getY()][right.getX()] = true;
+                }
+            }
+
+            // In order to optimize field evaluation, we consider the first spot as a free one and we decrement the
+            // final result by 1 if it was not
+            return size - (availableSpot.evaluate(target) ? 0 : 1);
+        }
+
+        @Override
+        public String toString() {
+            return "FloodFillAI{}" + super.toString();
         }
     }
 
@@ -222,7 +343,7 @@ final class Player {
             Optional<ActionsType> maybeNextValidMove = Arrays.stream(chromosome.genes)
                     .filter(actionsType -> {
                         Spot next = currentSpot.next(actionsType);
-                        return battleField.isWithinGrid(next) && !battleField.hasBeenVisited(next);
+                        return battleField.getGridSize().isWithinGrid(next) && !battleField.hasBeenVisited(next);
                     }).findFirst();
 
             ActionsType nextAction = maybeNextValidMove.orElse(ActionsType.RIGHT);
@@ -549,17 +670,22 @@ final class Player {
         private static final int MAX_X = 30;
         private static final int MAX_Y = 20;
 
-        private final boolean[][] grid;
+        private static final GridSize GRID_SIZE = new GridSize(MAX_X, MAX_Y);
+
         private final Map<Spot, Spot> currentSpot;
         private final Map<Spot, Set<Spot>> visitedSpots;
+        private final boolean[][] grid;
+        private int availableSpotsCnt;
 
         public BattleField() {
             this.grid = new boolean[MAX_Y][MAX_X];
             this.currentSpot = new HashMap<>();
             this.visitedSpots = new HashMap<>();
+            this.availableSpotsCnt = MAX_X * MAX_Y;
         }
 
         public BattleField(BattleField another) {
+            this.availableSpotsCnt = another.availableSpotsCnt;
             this.currentSpot = new HashMap<>(another.currentSpot);
             this.visitedSpots = new HashMap<>(another.visitedSpots.size());
 
@@ -598,7 +724,11 @@ final class Player {
             this.visitedSpots.put(startSpot, visitedSpots);
 
             grid[startSpot.getY()][startSpot.getX()] = true;
-            grid[currentSpot.getY()][currentSpot.getX()] = true;
+            availableSpotsCnt--;
+            if (!startSpot.equals(currentSpot)) {
+                grid[currentSpot.getY()][currentSpot.getX()] = true;
+                availableSpotsCnt--;
+            }
         }
 
         public void moveTo(Spot startSpot, Spot currentSpot) {
@@ -612,6 +742,7 @@ final class Player {
             visitedSpots.get(startSpot).add(currentSpot);
 
             grid[currentSpot.getY()][currentSpot.getX()] = true;
+            availableSpotsCnt--;
         }
 
         public Spot getCurrentSpot(Spot startSpot) {
@@ -622,16 +753,12 @@ final class Player {
             return grid[y][x];
         }
 
-        public boolean isWithinGrid(int x, int y) {
-            return x >= 0 && x < grid[0].length && y >= 0 && y < grid.length;
+        public GridSize getGridSize() {
+            return GRID_SIZE;
         }
 
         public boolean hasBeenVisited(Spot spot) {
             return hasBeenVisited(spot.getX(), spot.getY());
-        }
-
-        public boolean isWithinGrid(Spot spot) {
-            return isWithinGrid(spot.getX(), spot.getY());
         }
 
         public Set<Spot> getStartSpots() {
@@ -646,8 +773,13 @@ final class Player {
                 Set<Spot> spots = visitedSpots.remove(startSpot);
                 for (Spot spot : spots) {
                     grid[spot.getY()][spot.getX()] = false;
+                    availableSpotsCnt++;
                 }
             }
+        }
+
+        public int getAvailableSpotsCount() {
+            return availableSpotsCnt;
         }
 
         public BattleFieldSnapshot getSnapshot() {
@@ -699,16 +831,16 @@ final class Player {
             return battleField.hasBeenVisited(x, y);
         }
 
-        public boolean isWithinGrid(int x, int y) {
-            return battleField.isWithinGrid(x, y);
+        public GridSize getGridSize() {
+            return battleField.getGridSize();
+        }
+
+        public int getAvailableSpotsCount() {
+            return battleField.getAvailableSpotsCount();
         }
 
         public boolean hasBeenVisited(Spot spot) {
             return battleField.hasBeenVisited(spot);
-        }
-
-        public boolean isWithinGrid(Spot spot) {
-            return battleField.isWithinGrid(spot);
         }
     }
 
@@ -883,5 +1015,35 @@ final class Player {
 
     public interface EvaluationFunction {
         double evaluate(TronSimulator engine, Spot startAt, ActionsType[] actions);
+    }
+
+    public static class GridSize {
+        private final int maxX;
+        private final int maxY;
+
+        public GridSize(int maxX, int maxY) {
+            this.maxX = maxX;
+            this.maxY = maxY;
+        }
+
+        public int getMaxX() {
+            return maxX;
+        }
+
+        public int getMaxY() {
+            return maxY;
+        }
+
+        public boolean isWithinGrid(int x, int y) {
+            return x >= 0 && x < maxX && y >= 0 && y < maxY;
+        }
+
+        public boolean isWithinGrid(Spot spot) {
+            return isWithinGrid(spot.getX(), spot.getY());
+        }
+    }
+
+    public interface AvailableSpot {
+        boolean evaluate(Spot spot);
     }
 }

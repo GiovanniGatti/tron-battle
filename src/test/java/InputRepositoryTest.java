@@ -14,6 +14,7 @@ class InputRepositoryTest implements WithAssertions {
     @Test
     @DisplayName("reads the correct number of players")
     void loadsCorrectNumberOfPlayers() {
+        //This test is buggy --> points might be the same
         PlayerInputProvider inputProvider =
                 new PlayerInputProvider(3, 0, anyPoint(), new Player.Spot[] { anyPoint(), anyPoint() });
         Player.InputRepository repo = new Player.InputRepository(inputProvider::inputStream);

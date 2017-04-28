@@ -22,7 +22,7 @@ public final class TronGameEngine {
         Player.Spot current = battleField.getCurrentSpot(startSpot);
         Player.Spot next = current.next(action);
 
-        if (battleField.isWithinGrid(next)) {
+        if (battleField.getGridSize().isWithinGrid(next)) {
             if (!battleField.hasBeenVisited(next)) {
                 battleField.moveTo(startSpot, next);
                 return;

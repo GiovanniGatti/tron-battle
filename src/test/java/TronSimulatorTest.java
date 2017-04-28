@@ -85,6 +85,46 @@ class TronSimulatorTest implements WithAssertions {
     }
 
     @Test
+    @DisplayName("player continues movement even after collision")
+    void whenPlayerCollidesHeDoesNotDie() {
+
+        Player.Spot playerStartSpot = new Player.Spot(15, 11);
+        Player.Spot opponentStartSpot = new Player.Spot(15, 10);
+
+        Player.TronSimulator ge = withFreshBattleField(playerStartSpot, opponentStartSpot);
+
+        assertThat(ge.perform(playerStartSpot, Player.ActionsType.UP)).isFalse();
+        assertThat(ge.getCurrentSpot(playerStartSpot)).isEqualTo(new Player.Spot(15, 11));
+
+        assertThat(ge.perform(playerStartSpot, Player.ActionsType.RIGHT)).isTrue();
+        assertThat(ge.hasBeenVisited(16, 11)).isTrue();
+        assertThat(ge.getCurrentSpot(playerStartSpot)).isEqualTo(new Player.Spot(16, 11));
+
+        assertThat(ge.hasBeenVisited(15, 11)).isTrue();
+        assertThat(ge.hasBeenVisited(15, 10)).isTrue();
+        assertThat(ge.hasBeenVisited(16, 11)).isTrue();
+
+        assertThat(ge.getStartSpots()).containsOnly(new Player.Spot(15, 11), new Player.Spot(15, 10));
+    }
+
+    @Test
+    @DisplayName("correctly keeps track of visited spots")
+    void correctlyKeepsTrackOfVisitedSpots() {
+
+        Player.Spot playerStartSpot = new Player.Spot(0, 0);
+        Player.Spot opponentStartSpot = new Player.Spot(15, 10);
+
+        Player.TronSimulator ge = withFreshBattleField(playerStartSpot, opponentStartSpot);
+
+        ge.perform(playerStartSpot, Player.ActionsType.RIGHT);
+        ge.perform(playerStartSpot, Player.ActionsType.LEFT); // won't move otherwise it would kills itself
+        ge.perform(playerStartSpot, Player.ActionsType.RIGHT);
+
+        Player.GridSize gridSize = ge.getGridSize();
+        assertThat(ge.getAvailableSpotsCount()).isEqualTo(gridSize.getMaxX() * gridSize.getMaxY() - 4);
+    }
+
+    @Test
     @DisplayName("can simulate a full match")
     void canSimulateAFullMatch() {
         Player.Spot playerStartSpot = new Player.Spot(9, 4);

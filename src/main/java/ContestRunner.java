@@ -40,6 +40,8 @@ public final class ContestRunner {
     private static List<Function<IntSupplier, Supplier<AI>>> generateAis() {
         return Arrays.asList(
                 playerInput -> () -> new AIMapper(
+                        new Player.FloodFillAI(new Player.InputRepository(playerInput))),
+                playerInput -> () -> new AIMapper(
                         new Player.RelaxedLongestSequenceAI(new Player.InputRepository(playerInput))),
                 playerInput -> () -> new AIMapper(
                         new LongestSequenceAI(new Player.InputRepository(playerInput))),

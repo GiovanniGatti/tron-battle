@@ -342,6 +342,7 @@ final class Player {
 
             Optional<ActionsType> maybeNextValidMove = Arrays.stream(chromosome.genes)
                     .filter(actionsType -> {
+                        //FIXME: it shouldn't be able to walk through himself
                         Spot next = currentSpot.next(actionsType);
                         return battleField.getGridSize().isWithinGrid(next) && !battleField.hasBeenVisited(next);
                     }).findFirst();

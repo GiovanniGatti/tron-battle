@@ -24,7 +24,7 @@ public final class GameRunner {
                         new SnailAI(new KnowledgeRepo(opponentInput))),
                 () -> PvPGE.withFreshBattleField(false, playerStartSpot, opponentStartSpot),
                 pool,
-                301);
+                5);
 
         Game.GameResult call = game.call();
 
